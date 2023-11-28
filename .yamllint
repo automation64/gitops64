@@ -1,0 +1,42 @@
+---
+extends: default
+
+yaml-files:
+  - "*.yml"
+  - "*.yaml"
+
+ignore: |
+  var/fluxcd/*/flux-system
+
+rules:
+  comments:
+    require-starting-space: true
+    min-spaces-from-content: 1
+  comments-indentation: "enable"
+  document-start:
+    present: true
+  document-end:
+    present: true
+    level: "warning"
+  empty-lines:
+    max: 1
+    level: "error"
+  empty-values:
+    forbid-in-block-mappings: true
+    forbid-in-flow-mappings: true
+  hyphens:
+    max-spaces-after: 1
+    level: "error"
+  indentation:
+    indent-sequences: true
+    check-multi-line-strings: false
+  new-line-at-end-of-file: "enable"
+  line-length:
+    max: 160
+  trailing-spaces: "enable"
+  truthy:
+    allowed-values:
+      - "true"
+      - "false"
+    check-keys: true
+...
