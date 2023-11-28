@@ -88,13 +88,16 @@ function minikube_control_certificate_approve() {
   local certificate=''
   local certificate_list=''
 
-  bl64_msg_show_task 'approve node certificates'
-  certificate_list="$(
-    bl64_k8s_run_kubectl "$BL64_VAR_DEFAULT" \
-      get csr -o jsonpath="{.items[*].metadata.name}{'\n'}"
-  )" ||
-    return $?
+  bl64_msg_show_task 'wait for new certificate requests'
+  while [[ -z "$certificate_list" ]]; do
+    certificate_list="$(
+      bl64_k8s_run_kubectl "$BL64_VAR_DEFAULT" \
+        get csr -o jsonpath="{.items[*].metadata.name}{'\n'}"
+    )" ||
+      return $?
+  done
 
+  bl64_msg_show_task 'approve node certificates'
   for certificate in $certificate_list; do
     bl64_k8s_run_kubectl "$BL64_VAR_DEFAULT" \
       certificate approve "$certificate" ||
@@ -184,9 +187,9 @@ function minikube_control_cluster_stop() {
   bl64_ui_ask_confirmation \
     'Is it safe to shutdown the cluster?. Confirm by typing:' \
     'YES' &&
-  "$MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN" \
-    stop \
-    --profile="$MINIKUBE_CLUSTER_PROFILE"
+    "$MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN" \
+      stop \
+      --profile="$MINIKUBE_CLUSTER_PROFILE"
   bl64_dbg_app_trace_stop
 }
 
