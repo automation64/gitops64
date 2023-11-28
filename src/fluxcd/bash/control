@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+# Template: 1.1.0
+#######################################
+# FluxCD / Control
+#
+# Control script for Minikube cluster
+#
+# Author: SerDigital64 (https://github.com/serdigital64)
+# Repository: TODO: https://github.com/automation64/gitops64
+# Version: 1.0.0
+#
+#######################################
+# Copyright [2023] [serdigital64@gmail.com]
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#######################################
+
+#
+# Imports
+#
+
+# shellcheck source=SCRIPTDIR/../../../bin/dev-set
+source ./bin/dev-set || exit 1
+
+# shellcheck source-path=SCRIPTDIR/../../../lib/bl64
+source "${DEV_CICD_BASHLIB64}/bashlib64.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
+
+# shellcheck source-path=SCRIPTDIR/../../gitops/bash
+source "${DEV_SRC}/gitops/bash-lib/setup" || { echo "Error: unable to load bashlib64" && exit 1; }
+
+#
+# Globals
+#
+
+export FLUXCD_CONTROL_FLUX_BIN="${FLUXCD_CONTROL_FLUX_BIN:-/usr/local/bin/flux}"
+export FLUXCD_CONTROL_GH_BIN="${FLUXCD_CONTROL_GH_BIN:-/usr/bin/gh}"
+
+#
+# Functions
+#
+
+function fluxcd_control_provision() {
+  bl64_dbg_app_show_function
+  "$FLUXCD_CONTROL_GH_BIN" auth token |
+    "$FLUXCD_CONTROL_FLUX_BIN" \
+      bootstrap github \
+      --private \
+      --context="$FLUXCD_CLUSTER_CONTEXT" \
+      --owner="$FLUXCD_CLUSTER_OWNER" \
+      --repository="$FLUXCD_CLUSTER_REPOSITORY" \
+      --branch="$FLUXCD_CLUSTER_BRANCH" \
+      --path="$FLUXCD_CLUSTER_PATH"
+}
+
+#######################################
+# Initialize environment
+#
+# Arguments:
+#   None
+# Outputs:
+#   Initializacion progress messages
+# Returns:
+#   0: initialization ok
+#   >: failed to initialize
+#######################################
+function fluxcd_control_initialize() {
+  bl64_dbg_app_show_function "@"
+  local command="$1"
+  local environment="$2"
+  local configuration_fluxcd="etc/${environment}/fluxcd/cluster.yaml"
+
+  bl64_check_parameter 'command' &&
+    bl64_check_parameter 'environment' ||
+    { fluxcd_control_help && return 1; }
+
+  bl64_check_file "$configuration_fluxcd" &&
+    bl64_check_command "$FLUXCD_CONTROL_FLUX_BIN" &&
+    bl64_check_command "$FLUXCD_CONTROL_GH_BIN" &&
+    bl64_k8s_setup &&
+    gitops_initialize &&
+    gitops_setup_import_etc "$configuration_fluxcd" ||
+    return $?
+
+  return 0
+}
+
+#######################################
+# Show script usage description
+#
+# Arguments:
+#   None
+# Outputs:
+#   Command line format and description
+# Returns:
+#   0
+#######################################
+function fluxcd_control_help() {
+  bl64_msg_show_usage \
+    '-p -e Environment [-V Verbose] [-D Debug] [-h]' \
+    'Perform initial installation of FluxCD into K8S cluster' \
+    '
+    -p            : Provision FluxCD to the target environment using GitHub
+    ' '
+    -h            : Show help
+    ' '
+    -e Environment: Environment name
+    -V Verbose    : Set verbosity level. Format: one of BL64_MSG_VERBOSE_*
+    -D Debug      : Enable debugging mode. Format: one of BL64_DBG_TARGET_*
+    '
+}
+
+#
+# Main
+#
+
+declare fluxcd_control_debug="$BL64_DBG_TARGET_NONE"
+declare fluxcd_control_verbose="$BL64_MSG_VERBOSE_APP"
+declare fluxcd_control_command="$BL64_VAR_NULL"
+declare fluxcd_control_option=''
+declare fluxcd_control_environment="$BL64_VAR_NULL"
+
+(($# == 0)) && fluxcd_control_help && exit 1
+while getopts ':pe:V:D:h' fluxcd_control_option; do
+  case "$fluxcd_control_option" in
+  p) fluxcd_control_command='provision' ;;
+  e) fluxcd_control_environment="$OPTARG" ;;
+  V) fluxcd_control_verbose="$OPTARG" ;;
+  D) fluxcd_control_debug="$OPTARG" ;;
+  h) fluxcd_control_help && exit 0 ;;
+  *) fluxcd_control_help && exit 1 ;;
+  esac
+done
+bl64_dbg_set_level "$fluxcd_control_debug" && bl64_msg_set_level "$fluxcd_control_verbose" || exit $?
+fluxcd_control_initialize "$fluxcd_control_command" "$fluxcd_control_environment" || exit $?
+
+bl64_msg_show_batch_start "${fluxcd_control_command}"
+case "$fluxcd_control_command" in
+'provision') "fluxcd_control_${fluxcd_control_command}" ;;
+*) bl64_check_alert_parameter_invalid "$fluxcd_control_command" ;;
+esac
+bl64_msg_show_batch_finish $? "$fluxcd_control_command"

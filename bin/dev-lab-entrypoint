@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#
+# Run interactive bash session in sandbox container
+#
+# * Template: 1.1.0
+#
+
+#
+# Imports
+#
+
+cd /project
+# shellcheck source=SCRIPTDIR/dev-set
+source ./bin/dev-set || exit 1
+# shellcheck source-path=SCRIPTDIR/../lib/bl64
+source "${DEV_CICD_BASHLIB64}/bashlib64.bash" || exit 1
+
+#
+# Main
+#
+
+declare dev_lab_caller_home="/home/${DEV_LAB_USER}"
+declare dev_lab_credentials='/credentials'
+
+bl64_msg_show_task "import kubectl credentials (${DEV_LAB_USER} -> $(bl64_iam_user_get_current))"
+sudo mkdir "$dev_lab_caller_home" &&
+  sudo chmod 755 "$dev_lab_caller_home" &&
+  sudo ln -s "${dev_lab_credentials}/.kube" "${dev_lab_caller_home}/.kube" &&
+  sudo ln -s "${dev_lab_credentials}/.minikube" "${dev_lab_caller_home}/.minikube" &&
+  sudo ln -s "${dev_lab_credentials}/.kube" "${HOME}/.kube" &&
+  sudo ln -s "${dev_lab_credentials}/.minikube" "${HOME}/.minikube"
+bash --login

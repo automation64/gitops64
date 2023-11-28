@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+function gitops_initialize() {
+  bl64_dbg_app_show_function
+  bl64_xsv_setup
+}
+
+function gitops_setup_import_etc() {
+  bl64_dbg_app_show_function
+  local source_configuration="$1"
+  local dynamic_env=''
+
+  dynamic_env="$(bl64_fs_create_tmpfile)" ||
+    return $?
+
+  # shellcheck disable=SC1090
+  bl64_xsv_run_yq \
+    -o p \
+    '.' \
+    "$source_configuration" |
+    bl64_txt_run_awk \
+      -F ' = ' '
+  {
+      gsub( "[.]", "_", $1 )
+      print "export " toupper( $1 ) "='"'"'" $2 "'"'"'"
+  }' >"$dynamic_env" &&
+    source "$dynamic_env"
+
+  bl64_fs_rm_tmpfile "$dynamic_env"
+  return 0
+}
