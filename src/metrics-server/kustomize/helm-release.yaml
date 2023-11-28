@@ -1,0 +1,15 @@
+---
+apiVersion: "helm.toolkit.fluxcd.io/v2beta1"
+kind: "HelmRelease"
+metadata:
+  name: "metrics-server"
+  namespace: "metrics-server"
+spec:
+  chart:
+    spec:
+      chart: "metrics-server"
+      reconcileStrategy: "ChartVersion"
+      sourceRef:
+        kind: HelmRepository
+        name: "metrics-server"
+...

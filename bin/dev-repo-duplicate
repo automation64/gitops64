@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+#
+# Duplicate content from one GIT repository to other
+#
+# * Both repositories are independant from each other: they don't share the same origin
+# * Duplication will add and remove files from destination as needed
+# * Excluded from duplication: GIT metadata (.git) and temporary locations (tmp, lib)
+# * Operation is done using rsync tool
+# * Template: 1.0.0
+#
+
+#
+# Imports
+#
+
+# shellcheck source=SCRIPTDIR/dev-set
+source ./bin/dev-set || exit 1
+# shellcheck source-path=SCRIPTDIR/../lib/bl64
+source "${DEV_CICD_BASHLIB64}/bashlib64.bash" || exit 1
+
+#
+# Main
+#
+
+declare dev_repo_destination="${1:-}"
+declare dev_repo_dry_run="${2:-}"
+declare dev_repo_rsyn_bin='/usr/bin/rsync'
+declare dev_repo_source=''
+
+[[ -n "$DEV_CICD_DEBUG" ]] && bl64_dbg_all_enable
+bl64_check_command "$dev_repo_rsyn_bin" &&
+bl64_check_parameter 'dev_repo_destination' ||
+exit $?
+
+bl64_msg_all_enable_verbose
+bl64_msg_show_batch_start 'repo-duplicate'
+dev_repo_source="$(pwd)/"
+bl64_msg_show_task "duplicate repositories (${dev_repo_source}->${dev_repo_destination})"
+if [[ -z "$dev_repo_dry_run" ]]; then
+  bl64_msg_show_warning 'using dry-run mode. No action will be performed. Set the 2nd parameter to OFF to perform the action'
+  dev_repo_dry_run='--dry-run'
+else
+  [[ -n "$dev_repo_dry_run" ]] && dev_repo_dry_run=''
+fi
+"$dev_repo_rsyn_bin" \
+  ${dev_repo_dry_run} \
+  --one-file-system \
+  --human-readable \
+  --progress \
+  --checksum \
+  --stats \
+  --recursive \
+  --links \
+  --perms \
+  --delete \
+  --verbose \
+  --itemize-changes \
+  --ignore-times \
+  --exclude='.vscode/' \
+  --exclude='.git/' \
+  --exclude='tmp/' \
+  --exclude='lib/' \
+  --exclude='var/fluxcd/' \
+  "$dev_repo_source" \
+  "${dev_repo_destination}/"
+bl64_msg_show_batch_finish $? 'repo-duplicate'

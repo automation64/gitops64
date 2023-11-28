@@ -15,3 +15,7 @@ export DEV_ROOT
 # CICD / Debug flag for 'bin/' scripts
 DEV_CICD_DEBUG=''
 export DEV_CICD_DEBUG
+
+# Lint / YAML / Command
+DEV_CICD_LINT_YAML_BIN="/usr/bin/yamllint"
+export DEV_CICD_LINT_YAML_BIN

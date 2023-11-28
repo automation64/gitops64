@@ -33,7 +33,7 @@ bl64_check_parameter 'dev_lab_image' &&
 bl64_msg_all_enable_verbose
 bl64_msg_show_batch_start 'lab'
 bl64_msg_show_task "open container sanbox (${dev_lab_image})"
-echo bl64_fs_run_chmod 644 \
+bl64_fs_run_chmod 644 \
   "${HOME}"/.minikube/ca.crt \
   "${HOME}"/.minikube/profiles/*/client.* &&
   bl64_cnt_run_interactive \
