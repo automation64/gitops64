@@ -38,8 +38,9 @@ dev_repo_source="$(pwd)/"
 bl64_msg_show_task "duplicate repositories (${dev_repo_source}->${dev_repo_destination})"
 if [[ -z "$dev_repo_dry_run" ]]; then
   bl64_msg_show_warning 'using dry-run mode. No action will be performed. Set the 2nd parameter to OFF to perform the action'
+  dev_repo_dry_run='--dry-run'
 else
-  [[ -n "$dev_repo_dry_run" ]] && dev_repo_dry_run='--dry-run'
+  [[ -n "$dev_repo_dry_run" ]] && dev_repo_dry_run=''
 fi
 "$dev_repo_rsyn_bin" \
   ${dev_repo_dry_run} \

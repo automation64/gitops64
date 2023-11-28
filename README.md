@@ -2,11 +2,15 @@
 
 - [Project: GITOps64](#project-gitops64)
   - [Overview](#overview)
+    - [Directory structure](#directory-structure)
+    - [Modules](#modules)
+      - [GITOps](#gitops)
+      - [Infrastructure](#infrastructure)
   - [Usage](#usage)
   - [Deployment](#deployment)
     - [Requirements](#requirements)
       - [Tools](#tools)
-      - [Infrastructure](#infrastructure)
+      - [Infrastructure](#infrastructure-1)
     - [Installation](#installation)
   - [Contributing](#contributing)
   - [License](#license)
@@ -16,6 +20,29 @@
 
 GITOps64 is a working implementation of the GITOps methodoly intended to serve as a boilerplate for automated Kubernetes Application deployment projects.
 The main purpose is to provide ready-to-use deployment modules for popular Kubernetes tools.
+
+### Directory structure
+
+- `bin`: continous integration, repository, development scripts
+- `data`: location for persistent data files
+- `docs`: application deployment documentation
+- `etc`: deployment configuration
+- `lib`: location for temporary development time libraries (ignored from GIT)
+- `src`: deployment source code (Bash, Kustomization, etc)
+- `test`: test scripts for deployment modules
+- `tmp`: location for temporary content (ignored from GIT)
+- `var`: location for persistent runtime data (included in GIT)
+
+### Modules
+
+#### GITOps
+
+- FluxCD
+- Minikube
+
+#### Infrastructure
+
+- Metrics Server
 
 ## Usage
 

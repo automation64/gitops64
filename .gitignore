@@ -14,12 +14,18 @@ lib/*
 # Temporary files, mostly runtime
 tmp/*
 
-# Keep placeholder for empty directories
-!/**/.gitkeep
+# Secrets
+.secrets
+
+# Local variables
+.local
 
 #
 # Project specific exclusions
 #
 
 # FluxCD / Upstream only: do not save FluxCD deployment
-var/fluxcd/*/flux-system
+var/fluxcd/*/flux-system/*
+
+# Keep placeholder for empty directories
+!/**/.gitkeep
