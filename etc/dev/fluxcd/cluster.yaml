@@ -1,0 +1,9 @@
+---
+object: "gitops.fluxcd"
+fluxcd:
+  cluster:
+    owner: "itc64-dev"
+    repository: "fluxcd-test"
+    branch: "main"
+    path: "var/fluxcd/dev"
+    context: "dev"

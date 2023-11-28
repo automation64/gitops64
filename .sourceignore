@@ -1,5 +1,5 @@
 #
-# GIT Ignore
+# GitOps / FluxCD / Ignore files
 #
 # * Template version: 1.0.0
 #
@@ -7,6 +7,7 @@
 # VScode
 .vscode
 *.code-workspace
+.devcontainer
 
 # Dev libs. Dynamic content update at dev time
 lib/*
@@ -14,12 +15,18 @@ lib/*
 # Temporary files, mostly runtime
 tmp/*
 
-# Keep placeholder for empty directories
-!/**/.gitkeep
+# Dev scripts
+bin/*
+
+# Static data files
+data/*
+
+# CICD tests
+test/*
+
+# Ignore placeholder
+.gitkeep
 
 #
 # Project specific exclusions
 #
-
-# FluxCD / Upstream only: do not save FluxCD deployment
-var/fluxcd/*/flux-system

@@ -1,0 +1,9 @@
+---
+object: "gitops.minikube"
+minikube:
+  cluster:
+    profile: "dev"
+    addons:
+      install: false
+    driver:
+      name: "virtualbox"

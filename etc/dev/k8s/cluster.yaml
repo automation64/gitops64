@@ -1,0 +1,10 @@
+---
+object: "gitops.k8s"
+k8s:
+  cluster:
+    version: "1.28"
+    size:
+      nodes: 3
+      cpus: 2
+      memory: "8g"
+      disk_size: "30g"

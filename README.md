@@ -41,16 +41,23 @@ Optional:
 
 ### Installation
 
-- Clone this repository
+- Fork this repository to your GitHub account
+- Clone the forked repository
 
 ```shell
-git clone
+git clone <FORKED_REPOSITORY>
 cd gitops64
 ./bin/dev-lib-installer64 && ./bin/dev-lib-bashlib64
 ```
 
-- Review and update dev-environment configuration as needed: `etc/dev`
+- Turn off the following filter from `.gitignore` file:
 
+```shell
+# FluxCD / Upstream only: do not save FluxCD deployment
+var/fluxcd/*/flux-system
+```
+
+- Review and update dev-environment configuration as needed: `etc/dev`
 - Deploy Minikube cluster
 
 ```shell
