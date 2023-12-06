@@ -2,16 +2,16 @@
 #
 # Run interactive bash session in sandbox container
 #
-# * Template: 1.1.0
+# * Template: 1.1.1
 #
 
 #
 # Imports
 #
 
-# shellcheck source=SCRIPTDIR/dev-set
+# shellcheck source=bin/dev-set
 source ./bin/dev-set || exit 1
-# shellcheck source-path=SCRIPTDIR/../lib/bl64
+# shellcheck source=lib/bl64/bashlib64.bash
 source "${DEV_CICD_BASHLIB64}/bashlib64.bash" || exit 1
 
 #
@@ -39,10 +39,11 @@ bl64_fs_run_chmod 644 \
   bl64_cnt_run_interactive \
     --network=host \
     --entrypoint="$dev_lab_entrypoint" \
+    --env "DEV_LAB_USER=$(bl64_iam_user_get_current)" \
+    --env "DEV_TMP=/tmp" \
     --mount "type=bind,source=${DEV_SRC},target=${dev_lab_path_source},readonly" \
     --mount "type=bind,source=${DEV_ROOT},target=${dev_lab_path_project},readonly" \
     --mount "type=bind,source=${HOME}/.kube,target=${dev_lab_path_credentials}/.kube,readonly" \
     --mount "type=bind,source=${HOME}/.minikube,target=${dev_lab_path_credentials}/.minikube,readonly" \
-    --env "DEV_LAB_USER=$(bl64_iam_user_get_current)" \
     "${DEV_CICD_LAB_REGISTRY}/${dev_lab_image}"
 bl64_msg_show_batch_finish $? 'lab'

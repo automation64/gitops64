@@ -3,16 +3,16 @@
 # Lint YAML code
 #
 # * Check is done using yamllint
-# * Template: 1.1.0
+# * Template: 1.1.1
 #
 
 #
 # Imports
 #
 
-# shellcheck source=SCRIPTDIR/dev-set
+# shellcheck source=bin/dev-set
 source ./bin/dev-set || exit 1
-# shellcheck source-path=SCRIPTDIR/../lib/bl64
+# shellcheck source=lib/bl64/bashlib64-core.bash
 source "${DEV_CICD_BASHLIB64}/bashlib64-core.bash" || exit 1
 
 #
@@ -25,7 +25,7 @@ export YAMLLINT_CONFIG_FILE="$DEV_CICD_LINT_YAML_CFG"
 # Main
 #
 
-declare dev_lint_target="${1:-$DEV_CICD_LINT_YAML_TARGET}"
+declare dev_lint_target="${*:-$DEV_CICD_LINT_YAML_TARGET}"
 declare dev_lint_current=''
 
 [[ -n "$DEV_CICD_DEBUG" ]] && bl64_dbg_all_enable
@@ -34,8 +34,7 @@ bl64_check_parameter 'dev_lint_target' &&
   bl64_check_export 'DEV_CICD_LINT_YAML_CFG' &&
   bl64_check_export 'DEV_CICD_LINT_YAML_TARGET' &&
   bl64_check_export 'DEV_CICD_LINT_YAML_BIN' &&
-  bl64_check_command "$DEV_CICD_LINT_YAML_BIN" &&
-  bl64_check_directory "$dev_lint_target" ||
+  bl64_check_command "$DEV_CICD_LINT_YAML_BIN" ||
   exit $?
 
 bl64_msg_show_batch_start 'lint-yaml'
