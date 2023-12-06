@@ -2,10 +2,11 @@
 object: "gitops.k8s"
 k8s:
   cluster:
-    version: "1.28"
+    version: "1.27"
     size:
-      nodes: 3
-      cpus: 2
-      memory: "8g"
+      nodes: 2
+      cpus: 6
+      memory: "16g"
       disk_size: "30g"
+      extra_disks: 3
 ...
