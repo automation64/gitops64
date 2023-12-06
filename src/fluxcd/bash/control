@@ -29,13 +29,13 @@
 # Imports
 #
 
-# shellcheck source=SCRIPTDIR/../../../bin/dev-set
+# shellcheck source=bin/dev-set
 source ./bin/dev-set || exit 1
 
-# shellcheck source-path=SCRIPTDIR/../../../lib/bl64
+# shellcheck source=lib/bl64/bashlib64.bash
 source "${DEV_CICD_BASHLIB64}/bashlib64.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
 
-# shellcheck source-path=SCRIPTDIR/../../gitops/bash
+# shellcheck source=src/gitops/bash-lib/setup
 source "${DEV_SRC}/gitops/bash-lib/setup" || { echo "Error: unable to load bashlib64" && exit 1; }
 
 #
@@ -49,17 +49,50 @@ export FLUXCD_CONTROL_GH_BIN="${FLUXCD_CONTROL_GH_BIN:-/usr/bin/gh}"
 # Functions
 #
 
-function fluxcd_control_provision() {
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function fluxcd_control_bootstrap() {
   bl64_dbg_app_show_function
   "$FLUXCD_CONTROL_GH_BIN" auth token |
     "$FLUXCD_CONTROL_FLUX_BIN" \
       bootstrap github \
       --private \
+      --verbose \
+      --cache-dir="$DEV_TMP" \
       --context="$FLUXCD_CLUSTER_CONTEXT" \
       --owner="$FLUXCD_CLUSTER_OWNER" \
       --repository="$FLUXCD_CLUSTER_REPOSITORY" \
       --branch="$FLUXCD_CLUSTER_BRANCH" \
-      --path="$FLUXCD_CLUSTER_PATH"
+      --path="$FLUXCD_CLUSTER_PATH" \
+      --timeout="$FLUXCD_TIMEOUT"
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function fluxcd_control_cleanup() {
+  bl64_dbg_app_show_function
+  bl64_msg_show_task "remove FluxCD from GIT (${FLUXCD_CLUSTER_PATH})"
+  if [[ -d "$FLUXCD_CLUSTER_PATH" ]]; then
+    bl64_fs_rm_full "$FLUXCD_CLUSTER_PATH"
+  fi
+  return 0
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function fluxcd_control_uninstall() {
+  bl64_dbg_app_show_function
+  bl64_msg_show_task "uninstall FluxCD from cluster (${FLUXCD_CLUSTER_CONTEXT})"
+  bl64_ui_ask_confirmation \
+    'Do you want to uninstall FluxCD from the current cluster?. Confirm by typing:' \
+    'YES' &&
+    "$FLUXCD_CONTROL_FLUX_BIN" \
+      uninstall \
+      --verbose \
+      --silent \
+      --cache-dir="$DEV_TMP" \
+      --context="$FLUXCD_CLUSTER_CONTEXT" &&
+    fluxcd_control_cleanup
 }
 
 #######################################
@@ -79,6 +112,7 @@ function fluxcd_control_initialize() {
   local environment="$2"
   local configuration_fluxcd="etc/${environment}/fluxcd/cluster.yaml"
 
+  # shellcheck disable=SC2015
   bl64_check_parameter 'command' &&
     bl64_check_parameter 'environment' ||
     { fluxcd_control_help && return 1; }
@@ -88,7 +122,12 @@ function fluxcd_control_initialize() {
     bl64_check_command "$FLUXCD_CONTROL_GH_BIN" &&
     bl64_k8s_setup &&
     gitops_initialize &&
-    gitops_setup_import_etc "$configuration_fluxcd" ||
+    bl64_bsh_env_import_yaml "$configuration_fluxcd" &&
+    bl64_check_export 'FLUXCD_CLUSTER_CONTEXT' &&
+    bl64_check_export 'FLUXCD_CLUSTER_OWNER' &&
+    bl64_check_export 'FLUXCD_CLUSTER_REPOSITORY' &&
+    bl64_check_export 'FLUXCD_CLUSTER_BRANCH' &&
+    bl64_check_export 'FLUXCD_CLUSTER_PATH' ||
     return $?
 
   return 0
@@ -106,10 +145,11 @@ function fluxcd_control_initialize() {
 #######################################
 function fluxcd_control_help() {
   bl64_msg_show_usage \
-    '-p -e Environment [-V Verbose] [-D Debug] [-h]' \
-    'Perform initial installation of FluxCD into K8S cluster' \
+    '<-b|-u> -e Environment [-V Verbose] [-D Debug] [-h]' \
+    'Manage FluxCD service deployment' \
     '
-    -p            : Provision FluxCD to the target environment using GitHub
+    -b            : Bootstrap (install) FluxCD to the target environment using GitHub
+    -u            : Uninstall FluxCD from cluster
     ' '
     -h            : Show help
     ' '
@@ -130,9 +170,10 @@ declare fluxcd_control_option=''
 declare fluxcd_control_environment="$BL64_VAR_NULL"
 
 (($# == 0)) && fluxcd_control_help && exit 1
-while getopts ':pe:V:D:h' fluxcd_control_option; do
+while getopts ':bue:V:D:h' fluxcd_control_option; do
   case "$fluxcd_control_option" in
-  p) fluxcd_control_command='provision' ;;
+  b) fluxcd_control_command='bootstrap' ;;
+  u) fluxcd_control_command='uninstall' ;;
   e) fluxcd_control_environment="$OPTARG" ;;
   V) fluxcd_control_verbose="$OPTARG" ;;
   D) fluxcd_control_debug="$OPTARG" ;;
@@ -145,7 +186,7 @@ fluxcd_control_initialize "$fluxcd_control_command" "$fluxcd_control_environment
 
 bl64_msg_show_batch_start "${fluxcd_control_command}"
 case "$fluxcd_control_command" in
-'provision') "fluxcd_control_${fluxcd_control_command}" ;;
+'bootstrap' | 'uninstall') "fluxcd_control_${fluxcd_control_command}" ;;
 *) bl64_check_alert_parameter_invalid "$fluxcd_control_command" ;;
 esac
 bl64_msg_show_batch_finish $? "$fluxcd_control_command"

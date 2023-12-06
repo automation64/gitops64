@@ -1,0 +1,40 @@
+---
+apiVersion: "helm.toolkit.fluxcd.io/v2beta1"
+kind: "HelmRelease"
+metadata:
+  name: "rook-ceph"
+  namespace: "rook-ceph"
+spec:
+  interval: "60m"
+  chart:
+    spec:
+      chart: "rook-ceph"
+      version: "1.12.*"
+      interval: "6h"
+  values:
+    provisionerReplicas: 2
+    # Options: `ERROR`, `WARNING`, `INFO`, `DEBUG`
+    logLevel: "INFO"
+    csi:
+      # Supported values from 0 to 5. 0 for general useful logs, 5 for trace level verbosity.
+      logLevel: 0
+      # Supported values from 0 to 5. 0 for general useful logs (the default), 5 for trace level verbosity.
+      sidecarLogLevel: 0
+      enableRbdDriver: true
+      enableCephfsDriver: false
+      enableGrpcMetrics: false
+      enableCSIHostNetwork: false
+      enableCephfsSnapshotter: false
+      enableNFSSnapshotter: false
+      enableRBDSnapshotter: false
+      enablePluginSelinuxHostMount: false
+      enableCSIEncryption: false
+      provisionerReplicas: 1
+    resources:
+      limits:
+        cpu: 200m
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+...

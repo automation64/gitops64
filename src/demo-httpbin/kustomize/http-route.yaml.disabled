@@ -1,0 +1,21 @@
+---
+apiVersion: "gateway.networking.k8s.io/v1beta1"
+kind: "HTTPRoute"
+metadata:
+  name: "demo-httpbin"
+  namespace: "demo-httpbin"
+spec:
+  parentRefs:
+    - name: "istio-ingress"
+  rules:
+    - matches:
+      - path:
+          type: "PathPrefix"
+          value: "/status"
+      - path:
+          type: "PathPrefix"
+          value: "/delay"
+      backendRefs:
+        - name: "demo-httpbin"
+          port: 8000
+...

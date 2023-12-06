@@ -1,6 +1,7 @@
 ---
 object: "gitops.fluxcd"
 fluxcd:
+  timeout: "10m"
   cluster:
     owner: "itc64-dev"
     repository: "fluxcd-test"

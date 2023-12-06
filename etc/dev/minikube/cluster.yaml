@@ -6,5 +6,5 @@ minikube:
     addons:
       install: false
     driver:
-      name: "virtualbox"
+      name: "kvm2"
 ...

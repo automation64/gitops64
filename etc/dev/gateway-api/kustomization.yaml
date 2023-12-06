@@ -1,0 +1,11 @@
+---
+apiVersion: "kustomize.config.k8s.io/v1beta1"
+kind: "Kustomization"
+
+resources:
+  - "../../../src/gateway-api/kustomize"
+
+patches:
+  - path: "git-repository.patch.yaml"
+  - path: "fluxcd-kustomization.yaml"
+...

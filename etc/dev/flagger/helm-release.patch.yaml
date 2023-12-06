@@ -1,0 +1,14 @@
+---
+apiVersion: "helm.toolkit.fluxcd.io/v2beta1"
+kind: "HelmRelease"
+metadata:
+  name: "flagger"
+  namespace: "flagger-system"
+spec:
+  interval: "60m"
+  chart:
+    spec:
+      chart: "flagger"
+      version: "1.*"
+      interval: "6h"
+...

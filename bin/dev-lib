@@ -8,7 +8,7 @@
 # * Template: 1.0.0
 #
 
-# shellcheck source=SCRIPTDIR/devALIAS-set
+# shellcheck source=bin/dev-set
 source ./bin/dev-set || exit 1
 
 ./bin/dev-lib-installer64 &&

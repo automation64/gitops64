@@ -4,23 +4,23 @@
 #
 # * Check is done using shellcheck
 # * TestManSH is used to manage linting environment
-# * Template: 4.0.0
+# * Template: 4.0.1
 #
 
 #
 # Imports
 #
 
-# shellcheck source=SCRIPTDIR/dev-set
+# shellcheck source=bin/dev-set
 source ./bin/dev-set || exit 1
-# shellcheck source-path=SCRIPTDIR/../lib/bl64
+# shellcheck source=lib/bl64/bashlib64-core.bash
 source "${DEV_CICD_BASHLIB64}/bashlib64-core.bash" || exit 1
 
 #
 # Main
 #
 
-declare dev_lint_target="${1:-$DEV_CICD_LINT_BASH_TARGET}"
+declare dev_lint_target="${*:-$DEV_CICD_LINT_BASH_TARGET}"
 declare dev_lint_current=''
 
 [[ -n "$DEV_CICD_DEBUG" ]] && bl64_dbg_all_enable

@@ -3,7 +3,7 @@
 # Set development environment variables
 #
 # * Source this script from the project's root directory
-# * Template: 7.0.0
+# * Template: 7.0.1
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -48,7 +48,7 @@ function dev_set_load_local() {
   local dot_secrets='.secrets'
 
   dev_set_message "Load local environment variables ($(pwd)/${dot_local})"
-  # shellcheck source=SCRIPTDIR/../.local
+  # shellcheck source=.local
   source "$dot_local" ||
     {
       dev_set_error "unable to source file (${dot_local})"
@@ -57,7 +57,7 @@ function dev_set_load_local() {
   dot_secrets="${DEV_ROOT}/${dot_secrets}"
   if [[ -f "$dot_secrets" ]]; then
     dev_set_message "Load local secrets (${dot_secrets})"
-    # shellcheck source=SCRIPTDIR/../.secrets
+    # shellcheck source=.secrets
     source "${dot_secrets}" ||
       {
         dev_set_error "unable to source file (${dot_secrets})"
@@ -67,6 +67,7 @@ function dev_set_load_local() {
 }
 
 function dev_set_load_gitlab() {
+  # shellcheck disable=SC2154
   dev_set_message "GitLab detected, setting project root (${CI_PROJECT_DIR})"
   # shellcheck disable=SC2155
   export DEV_ROOT="$CI_PROJECT_DIR"
@@ -82,7 +83,7 @@ function dev_set_load_github() {
   dot_local="${DEV_ROOT}/${dot_local}"
   if [[ -f "$dot_local" ]]; then
     dev_set_message "Load local github automatic environment variables (${dot_local})"
-    # shellcheck source=SCRIPTDIR/../.local-github
+    # shellcheck disable=SC1090
     source "${dot_local}" ||
       {
         dev_set_error "unable to source file (${dot_local})"
@@ -110,7 +111,7 @@ function dev_set_check_root() {
 function dev_set_load_env() {
   local dot_env="${DEV_ROOT}/.env"
   dev_set_message "Load project environment variables (${dot_env})"
-  # shellcheck source=SCRIPTDIR/../.env
+  # shellcheck source=.env
   source "$dot_env" ||
     {
       dev_set_error "unable to read environment variables (${dot_env})"

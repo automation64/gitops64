@@ -6,7 +6,7 @@
     - [Modules](#modules)
       - [GITOps](#gitops)
       - [Infrastructure](#infrastructure)
-  - [Usage](#usage)
+    - [Demo Applications](#demo-applications)
   - [Deployment](#deployment)
     - [Requirements](#requirements)
       - [Tools](#tools)
@@ -42,9 +42,16 @@ The main purpose is to provide ready-to-use deployment modules for popular Kuber
 
 #### Infrastructure
 
+- Certificate Manager
+- Flagger
+- Istio
 - Metrics Server
+- Prometheus
+- Rook
 
-## Usage
+### Demo Applications
+
+- HTTPBin
 
 ## Deployment
 
@@ -69,12 +76,17 @@ Optional:
 ### Installation
 
 - Fork this repository to your GitHub account
-- Clone the forked repository
+- Clone the forked repository to your workstation
 
 ```shell
 git clone <FORKED_REPOSITORY>
+```
+
+- Initialize dev time resources
+
+```shell
 cd gitops64
-./bin/dev-lib-installer64 && ./bin/dev-lib-bashlib64
+./bin/dev-lib
 ```
 
 - Turn off the following filter from `.gitignore` file:
@@ -88,13 +100,20 @@ var/fluxcd/*/flux-system
 - Deploy Minikube cluster
 
 ```shell
-./src/minikube/bash/control -s -e dev
+./src/minikube/bash/control -s -e dev &&
+./src/minikube/bash/control -t -e dev
+```
+
+- Login to GitHub using the GH CLI
+
+```shell
+gh auth login
 ```
 
 - Deploy FluxCD to Minikube using GitHub
 
 ```shell
-./src/fluxcd/bash/control -p -e dev
+./src/fluxcd/bash/control -b -e dev
 ```
 
 ## Contributing
