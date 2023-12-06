@@ -1,0 +1,10 @@
+---
+apiVersion: "source.toolkit.fluxcd.io/v1beta2"
+kind: "HelmRepository"
+metadata:
+  name: "flagger"
+  namespace: "flagger-system"
+spec:
+  url: "oci://ghcr.io/fluxcd/charts"
+  type: "oci"
+...

@@ -1,0 +1,16 @@
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "demo-httpbin"
+  namespace: "demo-httpbin"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      version: "v1"
+  template:
+    metadata:
+      labels:
+        version: "v1"
+...

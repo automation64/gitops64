@@ -1,0 +1,19 @@
+---
+apiVersion: "helm.toolkit.fluxcd.io/v2beta1"
+kind: "HelmRelease"
+metadata:
+  name: "rook-ceph-cluster"
+  namespace: "rook-ceph-cluster"
+spec:
+  releaseName: "rook-ceph-cluster"
+  dependsOn:
+    - name: "rook-ceph"
+      namespace: "rook-ceph"
+  chart:
+    spec:
+      chart: "rook-ceph-cluster"
+      sourceRef:
+        kind: "HelmRepository"
+        name: "rook"
+  values: {}
+...
