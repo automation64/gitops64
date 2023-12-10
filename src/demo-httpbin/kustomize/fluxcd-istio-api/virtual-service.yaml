@@ -11,10 +11,10 @@ spec:
     - "istio-ingress/istio-ingress"
   http:
     - match:
-      - uri:
-          prefix: "/status"
-      - uri:
-          prefix: "/delay"
+        - uri:
+            prefix: "/status"
+        - uri:
+            prefix: "/delay"
       route:
         - destination:
             host: "demo-httpbin.demo-httpbin.svc.cluster.local"

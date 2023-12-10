@@ -164,6 +164,8 @@ function argocd_control_deploy() {
 #   0: initialization ok
 #   >: failed to initialize
 #######################################
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
 function argocd_control_initialize() {
   bl64_dbg_app_show_function "$@"
   local command="$1"

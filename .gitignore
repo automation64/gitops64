@@ -28,7 +28,7 @@ vault/*/*
 #
 
 # FluxCD / Upstream only: do not save FluxCD deployment
-var/dev/fluxcd/flux-system/*
+# var/dev/fluxcd/flux-system/*
 
 # Keep placeholder for empty directories
 !/**/.gitkeep

@@ -6,7 +6,7 @@ yaml-files:
   - "*.yaml"
 
 ignore: |
-  var/fluxcd/*/flux-system
+  var/*/fluxcd/flux-system
 
 rules:
   comments:

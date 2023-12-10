@@ -41,6 +41,8 @@ function gitops64_initialize() {
     bl64_check_export 'GITOPS64_PATH_TMP'
 }
 
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
 function gitops64_setup_load() {
   bl64_dbg_app_show_function "$@"
   local environment="$1"

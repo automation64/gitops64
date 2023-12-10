@@ -21,4 +21,4 @@ spec:
   values:
     nodeSelector:
       kubernetes.io/os: "linux"
----
+...
