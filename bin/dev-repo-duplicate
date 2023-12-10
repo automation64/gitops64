@@ -60,7 +60,6 @@ fi
   --exclude='.git/' \
   --exclude='tmp/' \
   --exclude='lib/' \
-  --exclude='var/fluxcd/' \
   "$dev_repo_source" \
   "${dev_repo_destination}/"
 bl64_msg_show_batch_finish $? 'repo-duplicate'

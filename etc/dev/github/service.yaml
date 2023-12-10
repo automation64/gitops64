@@ -1,0 +1,8 @@
+---
+github:
+  repository:
+    owner: "itc64-dev"
+    name: "fluxcd-test"
+  key:
+    type: "ed25519"
+...

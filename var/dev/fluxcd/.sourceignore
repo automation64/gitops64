@@ -1,0 +1,11 @@
+#
+# GitOps / FluxCD / Ignore files
+#
+# * Template version: 1.0.0
+#
+
+# Ignore placeholder
+.gitkeep
+
+# Ignore disabled modules
+*.disabled

@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-function gitops_initialize() {
-  bl64_dbg_app_show_function
-  bl64_xsv_setup &&
-    bl64_bsh_setup
-}

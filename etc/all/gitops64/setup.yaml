@@ -1,0 +1,24 @@
+---
+object: "gitops64.gitops64"
+version: "1.0.0"
+
+gitops64:
+
+  #
+  # Path definitions. Relative to project root
+  #
+  path:
+    etc: "etc"
+    vault: "vault"
+    var: "var"
+    src: "src"
+    tmp: "tmp"
+
+  #
+  # Key definitions. File name only
+  #
+  key:
+    deployment:
+      private: "deployment-key"
+      public: "deployment-key.pub"
+...

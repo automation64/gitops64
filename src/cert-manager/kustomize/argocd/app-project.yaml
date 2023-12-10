@@ -1,0 +1,19 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "AppProject"
+metadata:
+  name: "cert-manager"
+  namespace: "argocd"
+  finalizers:
+    - "resources-finalizer.argocd.argoproj.io"
+spec:
+  sourceRepos:
+    - '*'
+  destinations:
+    - server: "https://kubernetes.default.svc"
+      # creates resources in cert-manager and kube-system
+      namespace: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+...

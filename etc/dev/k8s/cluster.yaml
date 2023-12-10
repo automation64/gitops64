@@ -1,5 +1,6 @@
 ---
-object: "gitops.k8s"
+object: "gitops64.k8s"
+version: "1.0.0"
 k8s:
   cluster:
     version: "1.27"

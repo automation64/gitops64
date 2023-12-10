@@ -1,0 +1,12 @@
+---
+object: "gitops64.argocd"
+version: "1.0.0"
+argocd:
+  cluster:
+    namespace: "argocd"
+    context: "argocd"
+  gitops:
+    repository: "git@github.com:itc64-dev/fluxcd-test.git"
+  server:
+    access: "port-forward"
+...

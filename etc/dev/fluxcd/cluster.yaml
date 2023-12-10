@@ -1,11 +1,12 @@
 ---
-object: "gitops.fluxcd"
+object: "gitops64.fluxcd"
+version: "1.0.0"
 fluxcd:
   timeout: "10m"
   cluster:
     owner: "itc64-dev"
     repository: "fluxcd-test"
     branch: "main"
-    path: "var/fluxcd/dev"
+    path: "var/dev/fluxcd"
     context: "dev"
 ...

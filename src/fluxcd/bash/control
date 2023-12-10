@@ -3,11 +3,11 @@
 #######################################
 # FluxCD / Control
 #
-# Control script for Minikube cluster
+# Control script for FluxCD service
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 1.0.0
+# Version: 1.1.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -29,14 +29,11 @@
 # Imports
 #
 
-# shellcheck source=bin/dev-set
-source ./bin/dev-set || exit 1
-
 # shellcheck source=lib/bl64/bashlib64.bash
-source "${DEV_CICD_BASHLIB64}/bashlib64.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
+source 'lib/bl64/bashlib64.bash' || { echo "Error: unable to load bashlib64" && exit 1; }
 
-# shellcheck source=src/gitops/bash-lib/setup
-source "${DEV_SRC}/gitops/bash-lib/setup" || { echo "Error: unable to load bashlib64" && exit 1; }
+# shellcheck source=src/gitops64/bash-lib/setup
+source 'src/gitops64/bash-lib/setup' || { echo "Error: unable to load bashlib64" && exit 1; }
 
 #
 # Globals
@@ -58,7 +55,7 @@ function fluxcd_control_bootstrap() {
       bootstrap github \
       --private \
       --verbose \
-      --cache-dir="$DEV_TMP" \
+      --cache-dir="$GITOPS64_PATH_TMP" \
       --context="$FLUXCD_CLUSTER_CONTEXT" \
       --owner="$FLUXCD_CLUSTER_OWNER" \
       --repository="$FLUXCD_CLUSTER_REPOSITORY" \
@@ -71,9 +68,10 @@ function fluxcd_control_bootstrap() {
 # shellcheck disable=SC2154
 function fluxcd_control_cleanup() {
   bl64_dbg_app_show_function
-  bl64_msg_show_task "remove FluxCD from GIT (${FLUXCD_CLUSTER_PATH})"
-  if [[ -d "$FLUXCD_CLUSTER_PATH" ]]; then
-    bl64_fs_rm_full "$FLUXCD_CLUSTER_PATH"
+  local flux_system="${FLUXCD_CLUSTER_PATH}/flux-system"
+  bl64_msg_show_task "remove FluxCD from GIT (${flux_system})"
+  if [[ -d "$flux_system" ]]; then
+    bl64_fs_rm_full "$flux_system"
   fi
   return 0
 }
@@ -84,13 +82,12 @@ function fluxcd_control_uninstall() {
   bl64_dbg_app_show_function
   bl64_msg_show_task "uninstall FluxCD from cluster (${FLUXCD_CLUSTER_CONTEXT})"
   bl64_ui_ask_confirmation \
-    'Do you want to uninstall FluxCD from the current cluster?. Confirm by typing:' \
-    'YES' &&
+    'Do you want to uninstall FluxCD from the current cluster?. Confirm by typing:' 'YES' &&
     "$FLUXCD_CONTROL_FLUX_BIN" \
       uninstall \
       --verbose \
       --silent \
-      --cache-dir="$DEV_TMP" \
+      --cache-dir="$GITOPS64_PATH_TMP" \
       --context="$FLUXCD_CLUSTER_CONTEXT" &&
     fluxcd_control_cleanup
 }
@@ -110,27 +107,24 @@ function fluxcd_control_initialize() {
   bl64_dbg_app_show_function "@"
   local command="$1"
   local environment="$2"
-  local configuration_fluxcd="etc/${environment}/fluxcd/cluster.yaml"
 
   # shellcheck disable=SC2015
   bl64_check_parameter 'command' &&
     bl64_check_parameter 'environment' ||
     { fluxcd_control_help && return 1; }
 
-  bl64_check_file "$configuration_fluxcd" &&
-    bl64_check_command "$FLUXCD_CONTROL_FLUX_BIN" &&
+  bl64_check_command "$FLUXCD_CONTROL_FLUX_BIN" &&
     bl64_check_command "$FLUXCD_CONTROL_GH_BIN" &&
-    bl64_k8s_setup &&
-    gitops_initialize &&
-    bl64_bsh_env_import_yaml "$configuration_fluxcd" &&
-    bl64_check_export 'FLUXCD_CLUSTER_CONTEXT' &&
-    bl64_check_export 'FLUXCD_CLUSTER_OWNER' &&
-    bl64_check_export 'FLUXCD_CLUSTER_REPOSITORY' &&
-    bl64_check_export 'FLUXCD_CLUSTER_BRANCH' &&
-    bl64_check_export 'FLUXCD_CLUSTER_PATH' ||
+    bl64_k8s_setup ||
     return $?
 
-  return 0
+  gitops64_initialize &&
+    gitops64_setup_load "$environment" 'fluxcd' 'cluster' &&
+    bl64_check_export 'FLUXCD_CLUSTER_BRANCH' &&
+    bl64_check_export 'FLUXCD_CLUSTER_CONTEXT' &&
+    bl64_check_export 'FLUXCD_CLUSTER_OWNER' &&
+    bl64_check_export 'FLUXCD_CLUSTER_PATH' &&
+    bl64_check_export 'FLUXCD_CLUSTER_REPOSITORY'
 }
 
 #######################################

@@ -43,6 +43,7 @@ bl64_fs_run_chmod 644 \
     --env "DEV_TMP=/tmp" \
     --mount "type=bind,source=${DEV_SRC},target=${dev_lab_path_source},readonly" \
     --mount "type=bind,source=${DEV_ROOT},target=${dev_lab_path_project},readonly" \
+    --mount "type=bind,source=${DEV_ROOT}/vault,target=${dev_lab_path_project}/vault" \
     --mount "type=bind,source=${HOME}/.kube,target=${dev_lab_path_credentials}/.kube,readonly" \
     --mount "type=bind,source=${HOME}/.minikube,target=${dev_lab_path_credentials}/.minikube,readonly" \
     "${DEV_CICD_LAB_REGISTRY}/${dev_lab_image}"

@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 1.0.0
+# Version: 1.1.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -29,14 +29,11 @@
 # Imports
 #
 
-# shellcheck source=bin/dev-set
-source ./bin/dev-set || exit 1
-
 # shellcheck source=lib/bl64/bashlib64.bash
-source "${DEV_CICD_BASHLIB64}/bashlib64.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
+source 'lib/bl64/bashlib64.bash' || { echo "Error: unable to load bashlib64" && exit 1; }
 
-# shellcheck source=src/gitops/bash-lib/setup
-source "${DEV_SRC}/gitops/bash-lib/setup" || { echo "Error: unable to load bashlib64" && exit 1; }
+# shellcheck source=src/gitops64/bash-lib/setup
+source 'src/gitops64/bash-lib/setup' || { echo "Error: unable to load bashlib64" && exit 1; }
 
 #
 # Globals
@@ -269,33 +266,27 @@ function minikube_control_initialize() {
   # shellcheck disable=SC2034
   local command="$1"
   local environment="$2"
-  local configuration_minikube="etc/${environment}/minikube/cluster.yaml"
-  local configuration_k8s="etc/${environment}/k8s/cluster.yaml"
 
   # shellcheck disable=SC2015
   bl64_check_parameter 'command' &&
     bl64_check_parameter 'environment' ||
     { minikube_control_help && return 1; }
 
-  bl64_check_file "$configuration_minikube" &&
-    bl64_check_file "$configuration_k8s" &&
-    bl64_check_command "$MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN" &&
-    bl64_k8s_setup &&
-    gitops_initialize &&
-    bl64_bsh_env_import_yaml "$configuration_minikube" &&
-    bl64_bsh_env_import_yaml "$configuration_k8s" ||
+  bl64_check_command "$MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN" &&
+    bl64_k8s_setup ||
     return $?
 
-  bl64_dbg_app_show_variables
-
-  bl64_check_export 'MINIKUBE_CLUSTER_PROFILE' &&
-    bl64_check_export 'K8S_CLUSTER_SIZE_NODES' &&
+  gitops64_initialize &&
+    gitops64_setup_load "$environment" 'minikube' 'cluster' &&
+    gitops64_setup_load "$environment" 'k8s' 'cluster' &&
     bl64_check_export 'K8S_CLUSTER_SIZE_CPUS' &&
-    bl64_check_export 'K8S_CLUSTER_SIZE_MEMORY' &&
     bl64_check_export 'K8S_CLUSTER_SIZE_DISK_SIZE' &&
+    bl64_check_export 'K8S_CLUSTER_SIZE_MEMORY' &&
+    bl64_check_export 'K8S_CLUSTER_SIZE_NODES' &&
+    bl64_check_export 'K8S_CLUSTER_VERSION' &&
     bl64_check_export 'MINIKUBE_CLUSTER_ADDONS_INSTALL' &&
     bl64_check_export 'MINIKUBE_CLUSTER_DRIVER_NAME' &&
-    bl64_check_export 'K8S_CLUSTER_VERSION'
+    bl64_check_export 'MINIKUBE_CLUSTER_PROFILE'
 }
 
 #######################################
