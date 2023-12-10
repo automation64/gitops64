@@ -1,0 +1,10 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "gateway-api"
+  namespace: "argocd"
+spec:
+  source:
+    targetRevision: "v1.0.0"
+...

@@ -4,13 +4,10 @@
   - [Overview](#overview)
     - [Directory structure](#directory-structure)
     - [Modules](#modules)
-      - [GITOps](#gitops)
-      - [Infrastructure](#infrastructure)
-    - [Demo Applications](#demo-applications)
   - [Deployment](#deployment)
     - [Requirements](#requirements)
       - [Tools](#tools)
-      - [Infrastructure](#infrastructure-1)
+      - [Infrastructure](#infrastructure)
     - [Installation](#installation)
   - [Contributing](#contributing)
   - [License](#license)
@@ -27,33 +24,33 @@ The main purpose is to provide ready-to-use deployment modules for popular Kuber
 - `data`: location for persistent data files
 - `docs`: application deployment documentation
 - `etc`: deployment configuration
-- `lib`: location for temporary development time libraries (ignored from GIT)
+- `lib`: location for temporary development time libraries (excluded from GIT)
 - `src`: deployment source code (Bash, Kustomization, etc)
 - `test`: test scripts for deployment modules
-- `tmp`: location for temporary content (ignored from GIT)
+- `tmp`: location for temporary content (excluded from GIT)
 - `var`: location for persistent runtime data (included in GIT)
+- `vault`: location for runtime secrets (excluded from GIT)
 
 ### Modules
 
-#### GITOps
-
-- FluxCD
-- Minikube
-
-#### Infrastructure
-
-- Certificate Manager
-- Flagger
-- Istio
-- Metrics Server
-- Prometheus
-- Rook
-
-### Demo Applications
-
-- HTTPBin
+- GitOps
+  - FluxCD
+  - ArgoCD
+  - Minikube
+- Infrastructure
+  - Certificate Manager
+  - Flagger
+  - GitHub
+  - Istio
+  - Metrics Server
+  - Prometheus
+  - Rook
+- Demo Applications
+  - HTTPBin
 
 ## Deployment
+
+Use the following procedure to deploy GitOps64 for testing purposes on a Minikube cluster and forked GitHub repository.
 
 ### Requirements
 
@@ -62,11 +59,8 @@ The main purpose is to provide ready-to-use deployment modules for popular Kuber
 - GIT
 - KubeCTL
 - FluxCD
-
-Optional:
-
-- GitHub CLI: for using GitHub as the upstream repository provider
-- Minikube: for implementing testing Kubernetes cluster
+- GitHub CLI
+- Minikube
 
 #### Infrastructure
 

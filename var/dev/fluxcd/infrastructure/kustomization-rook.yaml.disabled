@@ -1,0 +1,19 @@
+---
+apiVersion: "kustomize.toolkit.fluxcd.io/v1"
+kind: "Kustomization"
+metadata:
+  name: "rook"
+  namespace: "flux-system"
+spec:
+  interval: "1m0s"
+  timeout: "25m0s"
+  prune: true
+  wait: true
+  path: "./etc/dev/rook/fluxcd"
+  dependsOn:
+    - name: "metrics-server"
+    - name: "cert-manager"
+  sourceRef:
+    kind: "GitRepository"
+    name: "flux-system"
+...

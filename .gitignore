@@ -14,7 +14,10 @@ lib/*
 # Temporary files, mostly runtime
 tmp/*
 
-# Secrets
+# Runtime secrets
+vault/*/*
+
+# Dev-time Secrets
 .secrets
 
 # Local variables
@@ -25,7 +28,7 @@ tmp/*
 #
 
 # FluxCD / Upstream only: do not save FluxCD deployment
-var/fluxcd/*/flux-system/*
+var/dev/fluxcd/flux-system/*
 
 # Keep placeholder for empty directories
 !/**/.gitkeep

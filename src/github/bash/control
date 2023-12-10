@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+# Template: 1.1.0
+#######################################
+# GitHub / Control
+#
+# Control script for GitHub service
+#
+# Author: SerDigital64 (https://github.com/serdigital64)
+# Repository: https://github.com/automation64/gitops64
+# Version: 1.0.0
+#
+#######################################
+# Copyright [2023] [serdigital64@gmail.com]
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#######################################
+
+#
+# Imports
+#
+
+# shellcheck source=lib/bl64/bashlib64.bash
+source 'lib/bl64/bashlib64.bash' || { echo "Error: unable to load bashlib64" && exit 1; }
+
+# shellcheck source=src/gitops64/bash-lib/setup
+source 'src/gitops64/bash-lib/setup' || { echo "Error: unable to load bashlib64" && exit 1; }
+
+#
+# Globals
+#
+
+export GITHUB_CONTROL_GH_BIN="${GITHUB_CONTROL_GH_BIN:-/usr/bin/gh}"
+export GITHUB_CONTROL_KEYGEN_BIN="${GITHUB_CONTROL_KEYGEN_BIN:-/usr/bin/ssh-keygen}"
+
+#
+# Functions
+#
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function github_control_key_show() {
+  bl64_dbg_app_show_function "$@"
+  local environment="$1"
+  local repository="${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}"
+  bl64_msg_show_task "show GitHub repository deployment keys (${repository})"
+  "$GITHUB_CONTROL_GH_BIN" repo deploy-key \
+    --repo "$repository" \
+    list
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function github_control_key_add() {
+  bl64_dbg_app_show_function "$@"
+  local environment="$1"
+  local repository="${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}"
+  local key_title='GitOps64 Deployment SSH Key'
+  local key_private="${GITOPS64_PATH_VAULT}/${environment}/${GITOPS64_KEY_DEPLOYMENT_PRIVATE}"
+
+  bl64_msg_show_task "generate deployment SSH key (${key_private})"
+  if [[ -f "$key_private" ]]; then
+    bl64_msg_show_warning 'deployment key already created. Reusing existing one.'
+  else
+    "$GITHUB_CONTROL_KEYGEN_BIN" \
+      -N '' \
+      -t "$GITHUB_KEY_TYPE" \
+      -C "$key_title" \
+      -f "$key_private" ||
+      return $?
+  fi
+
+  bl64_msg_show_task "add GitHub repository deployment keys (${repository})"
+  "$GITHUB_CONTROL_GH_BIN" repo deploy-key \
+    --repo "$repository" \
+    --title "$key_title" \
+    add \
+    "${key_private}.pub"
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function github_control_key_remove() {
+  bl64_dbg_app_show_function "$@"
+  local environment="$1"
+  local repository="${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}"
+  local key_id="$2"
+  bl64_msg_show_task "remove GitHub repository deployment key (${repository}:${key_id})"
+  "$GITHUB_CONTROL_GH_BIN" repo deploy-key \
+    --repo "$repository" \
+    delete \
+    "$key_id"
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function github_control_login() {
+  bl64_dbg_app_show_function
+  bl64_msg_show_task 'login to GittHub'
+  "$GITHUB_CONTROL_GH_BIN" auth login
+}
+
+#######################################
+# Initialize environment
+#
+# Arguments:
+#   None
+# Outputs:
+#   Initializacion progress messages
+# Returns:
+#   0: initialization ok
+#   >: failed to initialize
+#######################################
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function github_control_initialize() {
+  bl64_dbg_app_show_function "$@"
+  local command="$1"
+  local environment="$2"
+  local key_id="$3"
+
+  # shellcheck disable=SC2015
+  bl64_check_parameter 'command' &&
+    bl64_check_parameter 'environment' ||
+    { github_control_help && return 1; }
+
+  bl64_check_command "$GITHUB_CONTROL_GH_BIN" &&
+    bl64_check_command "$GITHUB_CONTROL_KEYGEN_BIN" ||
+    return $?
+
+  gitops64_initialize &&
+    gitops64_setup_load "$environment" 'github' 'service' &&
+    bl64_check_export 'GITHUB_REPOSITORY_NAME' &&
+    bl64_check_export 'GITHUB_REPOSITORY_OWNER' &&
+    bl64_check_export 'GITHUB_KEY_TYPE' ||
+    return $?
+
+  if [[ "$command" == 'key_remove' ]]; then
+    bl64_check_parameter 'key_id' 'please specify the key-id to remove (-i)'
+  fi
+}
+
+#######################################
+# Show script usage description
+#
+# Arguments:
+#   None
+# Outputs:
+#   Command line format and description
+# Returns:
+#   0
+#######################################
+function github_control_help() {
+  bl64_msg_show_usage \
+    '<-l|-s|-a|-r> -e Environment [-i KeyID] [-V Verbose] [-D Debug] [-h]' \
+    'Control script for GitHub repository' \
+    '
+    -l            : Login to GitHub
+    -s            : Show repository deployment keys
+    -a            : Add repository deployment key
+    -r            : Remove repository deployment key
+    ' '
+    -h            : Show help
+    ' '
+    -e Environment: Environment name
+    -i KeyID      : Deployment Key ID
+    -V Verbose    : Set verbosity level. Format: one of BL64_MSG_VERBOSE_*
+    -D Debug      : Enable debugging mode. Format: one of BL64_DBG_TARGET_*
+    '
+}
+
+#
+# Main
+#
+
+declare github_control_command="$BL64_VAR_NULL"
+declare github_control_debug="$BL64_DBG_TARGET_NONE"
+declare github_control_option=''
+declare github_control_verbose="$BL64_MSG_VERBOSE_APP"
+declare github_control_environment="$BL64_VAR_NULL"
+declare github_control_key_id="$BL64_VAR_NULL"
+
+(($# == 0)) && github_control_help && exit 1
+while getopts ':lsare:i:V:D:h' github_control_option; do
+  case "$github_control_option" in
+  l) github_control_command='login' ;;
+  s) github_control_command='key_show' ;;
+  a) github_control_command='key_add' ;;
+  r) github_control_command='key_remove' ;;
+  e) github_control_environment="$OPTARG" ;;
+  i) github_control_key_id="$OPTARG" ;;
+  V) github_control_verbose="$OPTARG" ;;
+  D) github_control_debug="$OPTARG" ;;
+  h) github_control_help && exit 0 ;;
+  *) github_control_help && exit 1 ;;
+  esac
+done
+bl64_dbg_set_level "$github_control_debug" && bl64_msg_set_level "$github_control_verbose" || exit $?
+github_control_initialize "$github_control_command" "$github_control_environment" "$github_control_key_id" || exit $?
+
+bl64_msg_show_batch_start "${github_control_command}"
+case "$github_control_command" in
+'login') "github_control_${github_control_command}" ;;
+'key_show') "github_control_${github_control_command}" "$github_control_environment" ;;
+'key_add') "github_control_${github_control_command}" "$github_control_environment" ;;
+'key_remove') "github_control_${github_control_command}" "$github_control_environment" "$github_control_key_id" ;;
+*) bl64_check_alert_parameter_invalid "$github_control_command" ;;
+esac
+bl64_msg_show_batch_finish $? "$github_control_command"
