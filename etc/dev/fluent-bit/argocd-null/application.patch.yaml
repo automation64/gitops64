@@ -1,0 +1,17 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "fluent-bit"
+  namespace: "argocd"
+spec:
+  source:
+    targetRevision: "0.40.0"
+    helm:
+      valuesObject:
+        config:
+          outputs: |
+            [OUTPUT]
+                Name null
+                Match *
+...

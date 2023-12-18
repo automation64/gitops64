@@ -1,0 +1,19 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "grafana"
+  namespace: "argocd"
+spec:
+  source:
+    helm:
+      valuesObject:
+        datasources:
+          datasources.yaml:
+            apiVersion: 1
+            datasources:
+              - name: "Loki"
+                type: "loki"
+                access: "proxy"
+                url: "http://loki.loki.svc.cluster.local:3100"
+...

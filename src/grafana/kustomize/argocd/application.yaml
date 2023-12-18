@@ -1,0 +1,20 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "grafana"
+  namespace: "argocd"
+spec:
+  project: "grafana"
+  source:
+    chart: "grafana"
+    repoURL: "https://grafana.github.io/helm-charts"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "grafana"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+...
