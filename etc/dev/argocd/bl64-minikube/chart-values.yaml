@@ -1,0 +1,17 @@
+---
+global:
+  image:
+    tag: "v2.9.3"
+  logging:
+    # Set the global logging format. Either: `text` or `json`
+    format: json
+    # Set the global logging level. One of: `debug`, `info`, `warn` or `error`
+    level: info
+server:
+  replicas: 1
+  autoscaling:
+    enabled: false
+  service:
+    # Enable minikube service export
+    type: "NodePort"
+...

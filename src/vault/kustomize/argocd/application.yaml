@@ -1,0 +1,53 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "vault"
+  namespace: "argocd"
+spec:
+  project: "vault"
+  source:
+    chart: "vault"
+    repoURL: "https://helm.releases.hashicorp.com"
+    helm:
+      valuesObject:
+        global:
+          enabled: true
+          tlsDisable: false
+        injector:
+          enabled: true
+          image:
+            repository: "hashicorp/vault-k8s"
+          resources:
+              requests:
+                memory: 256Mi
+                cpu: 250m
+              limits:
+                memory: 256Mi
+                cpu: 250m
+        server:
+          resources:
+            requests:
+              memory: 8Gi
+              cpu: 200m
+            limits:
+              memory: 12Gi
+              cpu: 500m
+          ha:
+            enabled: true
+            replicas: 2
+            raft:
+              enabled: true
+          auditStorage:
+            enabled: true
+        ui:
+          enabled: false
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "vault"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+...

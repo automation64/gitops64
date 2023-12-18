@@ -1,0 +1,20 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "fluent-bit"
+  namespace: "argocd"
+spec:
+  project: "fluent-bit"
+  source:
+    chart: "fluent-bit"
+    repoURL: "https://fluent.github.io/helm-charts"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "fluent-bit"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+...
