@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Template: 1.0.0
+#######################################
+# GitOpos64 / Library
+#
+# Control script for GitHub service
+#
+# Author: SerDigital64 (https://github.com/serdigital64)
+# Repository: https://github.com/automation64/gitops64
+# Version: 2.0.0
+#
+#######################################
+# Copyright [2023] [serdigital64@gmail.com]
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#######################################
+
+function gitops64_initialize() {
+  bl64_dbg_app_show_function
+  local configuration="etc/all/gitops64/setup.yaml"
+
+  bl64_msg_show_task 'initialize GitOps64 environment'
+  bl64_check_file "$configuration" &&
+    bl64_xsv_setup &&
+    bl64_bsh_setup &&
+    bl64_bsh_env_import_yaml "$configuration" &&
+    bl64_check_export 'GITOPS64_PATH_ETC' &&
+    bl64_check_export 'GITOPS64_PATH_VAULT' &&
+    bl64_check_export 'GITOPS64_PATH_VAR' &&
+    bl64_check_export 'GITOPS64_PATH_SRC' &&
+    bl64_check_export 'GITOPS64_PATH_TMP'
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function gitops64_setup_load() {
+  bl64_dbg_app_show_function "$@"
+  local environment="$1"
+  local module="$2"
+  local profile="$3"
+  local setup_name="$4"
+  local prefix='bl64'
+
+  bl64_check_parameter 'environment' &&
+    bl64_check_parameter 'module' &&
+    bl64_check_parameter 'setup_name' ||
+    return $?
+
+  [[ "$profile" == "$BL64_VAR_DEFAULT" ]] && profile='default'
+
+  bl64_bsh_env_import_yaml "${GITOPS64_PATH_ETC}/${environment}/${module}/${prefix}-${profile}/${setup_name}.yaml"
+}

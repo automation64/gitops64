@@ -1,0 +1,18 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "AppProject"
+metadata:
+  name: "prometheus"
+  namespace: "argocd"
+  finalizers:
+    - "resources-finalizer.argocd.argoproj.io"
+spec:
+  sourceRepos:
+    - '*'
+  destinations:
+    - server: "https://kubernetes.default.svc"
+      namespace: "prometheus"
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+...

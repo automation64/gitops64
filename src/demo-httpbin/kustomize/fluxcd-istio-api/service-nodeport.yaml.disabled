@@ -8,6 +8,7 @@ metadata:
     app: "demo-httpbin"
     service: "demo-httpbin"
 spec:
+  # Enable minikube service export
   type: "NodePort"
   selector:
     app: "demo-httpbin"

@@ -9,17 +9,15 @@ spec:
   chart:
     spec:
       chart: "prometheus"
-      version: "25.*"
+      version: "25.8.2"
       interval: "6h"
   values:
     server:
-      persistentVolume:
-        storageClass: "ceph-block"
       resources:
         limits:
-          cpu: 400m
-          memory: 512Mi
+          cpu: "400m"
+          memory: "512Mi"
         requests:
-          cpu: 100m
-          memory: 256Mi
+          cpu: "100m"
+          memory: "256Mi"
 ...

@@ -94,8 +94,8 @@ var/fluxcd/*/flux-system
 - Deploy Minikube cluster
 
 ```shell
-./src/minikube/bash/control -s -e dev &&
-./src/minikube/bash/control -t -e dev
+./src/minikube/bl64/control -s -e dev &&
+./src/minikube/bl64/control -t -e dev
 ```
 
 - Login to GitHub using the GH CLI
@@ -107,7 +107,7 @@ gh auth login
 - Deploy FluxCD to Minikube using GitHub
 
 ```shell
-./src/fluxcd/bash/control -b -e dev
+./src/fluxcd/bl64/control -b -e dev
 ```
 
 ## Contributing

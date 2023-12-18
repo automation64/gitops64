@@ -1,0 +1,17 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "opensearch"
+  namespace: "argocd"
+spec:
+  source:
+    targetRevision: "2.17.0"
+    helm:
+      valuesObject:
+        singleNode: true
+        resources:
+          requests:
+            cpu: "600m"
+            memory: "200Mi"
+...

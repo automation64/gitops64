@@ -1,0 +1,25 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "k8s-secrets-store"
+  namespace: "argocd"
+spec:
+  project: "k8s-secrets-store"
+  source:
+    chart: "secrets-store-csi-driver"
+    repoURL: "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
+    helm:
+      valuesObject:
+        syncSecret:
+          enabled: true
+        enableSecretRotation: true
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "k8s-secrets-store"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+...

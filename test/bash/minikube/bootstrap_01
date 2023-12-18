@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+declare environment='dev'
+declare profile='medium'
+
+./src/minikube/control -e "$environment" -p "$profile" -s &&
+  ./src/minikube/control -e "$environment" -p "$profile" -t

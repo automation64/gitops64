@@ -1,0 +1,10 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "vault"
+  namespace: "argocd"
+spec:
+  source:
+    targetRevision: "0.27.0"
+...
