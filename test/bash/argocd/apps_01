@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+declare environment='dev'
+declare profile='nodeport'
+declare control='./src/infrastructure/argocd/bl64/control-application'
+
+"$control" -e "$environment" -p "$profile" -d

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+declare environment='dev'
+declare profile='medium'
+declare control='./src/kubernetes/kind/bl64/control'
+
+"$control" -e "$environment" -p "$profile" -s
