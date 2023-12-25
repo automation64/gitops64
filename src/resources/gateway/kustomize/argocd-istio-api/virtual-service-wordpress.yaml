@@ -1,0 +1,17 @@
+---
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "VirtualService"
+metadata:
+  name: "wordpress"
+  namespace: "istio-ingress"
+spec:
+  gateways:
+    - "istio-ingress/istio-ingress"
+  http:
+    - name: "wordpress"
+      route:
+        - destination:
+            host: "wordpress.wordpress.svc.cluster.local"
+            port:
+              number: 80
+...

@@ -1,0 +1,23 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "trust-manager"
+  namespace: "argocd"
+spec:
+  project: "cert-manager"
+  source:
+    chart: "trust-manager"
+    repoURL: "https://charts.jetstack.io"
+    helm:
+      valuesObject:
+        installCRDs: true
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "cert-manager"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+...

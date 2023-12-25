@@ -1,6 +1,6 @@
 ---
 object: "gitops64.gitops64"
-version: "1.0.0"
+version: "1.1.0"
 
 gitops64:
 
@@ -21,4 +21,13 @@ gitops64:
     deployment:
       private: "deployment-key"
       public: "deployment-key.pub"
+
+  #
+  # Module ID
+  #
+  module:
+    id:
+      bashlib64: "bl64"
+      argocd: "argocd"
+      fluxcd: "fluxcd"
 ...

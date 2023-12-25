@@ -1,0 +1,41 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "k8s-dashboard"
+  namespace: "argocd"
+spec:
+  source:
+    targetRevision: "6.0.8"
+    helm:
+      valuesObject:
+        # Warning: using insecure options and skip login
+        extraArgs:
+          - "--enable-skip-login"
+          - "--enable-insecure-login"
+          - "--disable-settings-authorizer"
+          - "--insecure-port=9090"
+          - "--insecure-bind-address=0.0.0.0"
+        rbac:
+          create: true
+          # Allow skip login to use cluster wide read-only role
+          clusterReadOnlyRole: true
+          clusterRoleMetrics: true
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "200Mi"
+          limits:
+            cpu: "2"
+            memory: "200Mi"
+        protocolHttp: true
+        service:
+          type: "ClusterIP"
+          externalPort: 9090
+        ingress:
+          enabled: false
+        metricsScraper:
+          enabled: false
+        metrics-server:
+          enabled: false
+...

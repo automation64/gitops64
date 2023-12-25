@@ -1,0 +1,10 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "istio-system-base"
+  namespace: "argocd"
+spec:
+  source:
+    targetRevision: "1.20.0"
+...

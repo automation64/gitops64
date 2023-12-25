@@ -1,0 +1,17 @@
+---
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "VirtualService"
+metadata:
+  name: "k8s-dashboard"
+  namespace: "istio-ingress"
+spec:
+  gateways:
+    - "istio-ingress/istio-ingress"
+  http:
+    - name: "k8s-dashboard"
+      route:
+        - destination:
+            host: "k8s-dashboard-kubernetes-dashboard.k8s-dashboard.svc.cluster.local"
+            port:
+              number: 9090
+...

@@ -1,0 +1,20 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "istio-system-base"
+  namespace: "argocd"
+spec:
+  project: "istio-system"
+  source:
+    chart: "base"
+    repoURL: "https://istio-release.storage.googleapis.com/charts"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "istio-system"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+...

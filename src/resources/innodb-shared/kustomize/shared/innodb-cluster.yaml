@@ -1,0 +1,9 @@
+---
+apiVersion: "mysql.oracle.com/v2"
+kind: "InnoDBCluster"
+metadata:
+  name: "innodb-shared"
+  namespace: "innodb-shared"
+spec:
+  secretName: "innodb-shared"
+...

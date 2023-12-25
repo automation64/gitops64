@@ -1,0 +1,17 @@
+---
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "VirtualService"
+metadata:
+  name: "http-echo"
+  namespace: "istio-ingress"
+spec:
+  gateways:
+    - "istio-ingress/istio-ingress"
+  http:
+    - name: "http-echo"
+      route:
+        - destination:
+            host: "http-echo.http-echo.svc.cluster.local"
+            port:
+              number: 8080
+...

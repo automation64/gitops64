@@ -1,0 +1,18 @@
+---
+apiVersion: "networking.istio.io/v1beta1"
+kind: "VirtualService"
+metadata:
+  name: "default"
+  namespace: "istio-ingress"
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - "istio-ingress/istio-ingress"
+  http:
+    - name: "Default"
+      directResponse:
+        status: 404
+        body:
+          string: "invalid URL"
+...

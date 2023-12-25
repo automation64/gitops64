@@ -3,24 +3,25 @@ apiVersion: "kustomize.config.k8s.io/v1beta1"
 kind: "Kustomization"
 resources:
   #
-  # Platform specific
-  #
-  - "../../../../etc/dev/minikube/argocd"
-  #
   # Core modules
   #
-  - "../../../../etc/dev/metrics-server/argocd"
-  - "../../../../etc/dev/gateway-api/argocd"
-  - "../../../../etc/dev/sealed-secrets/argocd"
-  - "../../../../etc/dev/cert-manager/argocd"
+  - "../../../../etc/dev/infrastructure/sealed-secrets/argocd"
+  - "../../../../etc/dev/infrastructure/cert-manager/argocd"
   #
   # Optional modules
   #
-  # disabled # - "../../../../etc/dev/k8s-secrets-store/argocd"
-  # disabled # - "../../../../etc/dev/vault/argocd"
-  # disabled # - "../../../../etc/dev/opensearch/argocd"
-  - "../../../../etc/dev/prometheus/argocd-minikube"
-  - "../../../../etc/dev/fluent-bit/argocd-loki"
-  - "../../../../etc/dev/loki/argocd-minikube"
-  - "../../../../etc/dev/grafana/argocd-minikube-loki-prometheus"
+  - "../../../../etc/dev/infrastructure/metallb/argocd"
+  - "../../../../etc/dev/infrastructure/prometheus/argocd-small"
+  - "../../../../etc/dev/infrastructure/grafana/argocd-small-prometheus"
+  - "../../../../etc/dev/infrastructure/fluent-bit/argocd-loki"
+  - "../../../../etc/dev/infrastructure/loki/argocd-small"
+  - "../../../../etc/dev/infrastructure/istio-system/argocd-small"
+  - "../../../../etc/dev/infrastructure/istio-ingress/argocd-istio-api"
+  - "../../../../etc/dev/infrastructure/kiali/argocd-small"
+  - "../../../../etc/dev/infrastructure/k8s-dashboard/argocd-small-insecure"
+  # disabled # - "../../../../etc/dev/infrastructure/wordpress/argocd-small"
+  # disabled # - "../../../../etc/dev/infrastructure/k8s-secrets-store/argocd"
+  # disabled # - "../../../../etc/dev/infrastructure/vault/argocd"
+  # disabled # - "../../../../etc/dev/infrastructure/opensearch/argocd"
+  # disabled # - "../../../../etc/dev/infrastructure/mysql-operator/argocd"
 ...
