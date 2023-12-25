@@ -18,7 +18,6 @@ source "${DEV_CICD_BASHLIB64}/bashlib64.bash" || exit 1
 # Functions
 #
 
-declare DEV_LAB_MINIKUBE_HOME="${HOME}/.minikube"
 declare DEV_LAB_KUBE_HOME="${HOME}/.kube"
 
 #
@@ -33,20 +32,16 @@ function dev_lab_open() {
   local dev_lab_entrypoint="${dev_lab_path_project}/bin/dev-lab-entrypoint"
 
   bl64_msg_show_task "open container sanbox (${dev_lab_image})"
-  bl64_fs_run_chmod 644 \
-    "${DEV_LAB_MINIKUBE_HOME}"/ca.crt \
-    "${DEV_LAB_MINIKUBE_HOME}"/profiles/*/client.* &&
-    bl64_cnt_run_interactive \
-      --network=host \
-      --entrypoint="$dev_lab_entrypoint" \
-      --env "DEV_LAB_USER=$(bl64_iam_user_get_current)" \
-      --env "DEV_TMP=/tmp" \
-      --mount "type=bind,source=${DEV_SRC},target=${dev_lab_path_source},readonly" \
-      --mount "type=bind,source=${DEV_ROOT},target=${dev_lab_path_project},readonly" \
-      --mount "type=bind,source=${DEV_ROOT}/vault,target=${dev_lab_path_project}/vault" \
-      --mount "type=bind,source=${DEV_LAB_KUBE_HOME},target=${dev_lab_path_credentials}/.kube,readonly" \
-      --mount "type=bind,source=${DEV_LAB_MINIKUBE_HOME},target=${dev_lab_path_credentials}/.minikube,readonly" \
-      "${DEV_CICD_LAB_REGISTRY}/${dev_lab_image}"
+  bl64_cnt_run_interactive \
+    --network=host \
+    --entrypoint="$dev_lab_entrypoint" \
+    --env "DEV_LAB_USER=$(bl64_iam_user_get_current)" \
+    --env "DEV_TMP=/tmp" \
+    --mount "type=bind,source=${DEV_SRC},target=${dev_lab_path_source},readonly" \
+    --mount "type=bind,source=${DEV_ROOT},target=${dev_lab_path_project},readonly" \
+    --mount "type=bind,source=${DEV_ROOT}/vault,target=${dev_lab_path_project}/vault" \
+    --mount "type=bind,source=${DEV_LAB_KUBE_HOME},target=${dev_lab_path_credentials}/.kube,readonly" \
+    "${DEV_CICD_LAB_REGISTRY}/${dev_lab_image}"
 }
 
 #
@@ -58,7 +53,6 @@ declare dev_lab_image="${1:-$DEV_CICD_LAB_IMAGE}"
 [[ -n "$DEV_CICD_DEBUG" ]] && bl64_dbg_all_enable
 bl64_check_parameter 'dev_lab_image' &&
   bl64_check_export 'DEV_CICD_LAB_REGISTRY' &&
-  bl64_check_directory "$DEV_LAB_MINIKUBE_HOME" &&
   bl64_check_directory "$DEV_LAB_KUBE_HOME" &&
   bl64_cnt_setup ||
   exit $?

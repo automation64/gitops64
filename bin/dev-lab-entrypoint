@@ -28,7 +28,14 @@ bl64_msg_show_task "import kubectl credentials (${DEV_LAB_USER} -> $(bl64_iam_us
 sudo mkdir "$dev_lab_caller_home" &&
   sudo chmod 755 "$dev_lab_caller_home" &&
   sudo ln -s "${dev_lab_credentials}/.kube" "${dev_lab_caller_home}/.kube" &&
+  sudo ln -s "${dev_lab_credentials}/.kube" "${HOME}/.kube" ||
+  exit $?
+
+if [[ -d "${dev_lab_credentials}/.minikube" ]]; then
+  bl64_msg_show_task "import minikube credentials (${DEV_LAB_USER} -> $(bl64_iam_user_get_current))"
   sudo ln -s "${dev_lab_credentials}/.minikube" "${dev_lab_caller_home}/.minikube" &&
-  sudo ln -s "${dev_lab_credentials}/.kube" "${HOME}/.kube" &&
-  sudo ln -s "${dev_lab_credentials}/.minikube" "${HOME}/.minikube"
+    sudo ln -s "${dev_lab_credentials}/.minikube" "${HOME}/.minikube" ||
+    exit $?
+fi
+
 bash --login
