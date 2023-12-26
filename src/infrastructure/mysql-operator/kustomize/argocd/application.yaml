@@ -1,0 +1,22 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "mysql-operator"
+  namespace: "argocd"
+spec:
+  project: "mysql-operator"
+  source:
+    chart: "mysql-operator"
+    repoURL: "https://mysql.github.io/mysql-operator/"
+    helm:
+      valuesObject: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "mysql-operator"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+...

@@ -1,0 +1,22 @@
+---
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "Gateway"
+metadata:
+  name: "istio-ingress"
+  namespace: "istio-ingress"
+spec:
+  servers:
+    - port:
+        number: 80
+        name: "http"
+        protocol: "HTTP"
+      tls:
+        httpsRedirect: false
+      hosts:
+        - "httpbin.gitops64"
+        - "http-echo.gitops64"
+        - "grafana.gitops64"
+        - "kiali.gitops64"
+        - "k8s-dashboard.gitops64"
+        # disabled # - "wordpress-echo.gitops64"
+...

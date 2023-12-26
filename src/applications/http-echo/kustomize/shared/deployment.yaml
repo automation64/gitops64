@@ -1,0 +1,27 @@
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "http-echo"
+  namespace: "http-echo"
+spec:
+  selector:
+    matchLabels:
+      app: "http-echo"
+  template:
+    metadata:
+      labels:
+        app: "http-echo"
+    spec:
+      serviceAccountName: "http-echo"
+      containers:
+        - image: "hashicorp/http-echo"
+          imagePullPolicy: "IfNotPresent"
+          name: "http"
+          args:
+            - "-text=hello-world"
+            - "-listen=:8080"
+            - "-status-code=200"
+          ports:
+            - containerPort: 8080
+...

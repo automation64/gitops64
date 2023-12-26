@@ -1,0 +1,14 @@
+---
+apiVersion: "kustomize.config.k8s.io/v1beta1"
+kind: "Kustomization"
+
+resources:
+  - "gateway.yaml"
+  - "virtual-service-kiali.yaml"
+  - "virtual-service-grafana.yaml"
+  - "virtual-service-k8s-dashboard.yaml"
+  # disabled # - "virtual-service-wordpress.yaml"
+  # - "virtual-service-default.yaml"
+  # disabled # - "virtual-service-httpbin.yaml"
+  # disabled # - "virtual-service-http-echo.yaml"
+...

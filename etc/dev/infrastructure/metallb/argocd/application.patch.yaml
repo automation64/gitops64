@@ -1,0 +1,10 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "metallb"
+  namespace: "argocd"
+spec:
+  source:
+    targetRevision: "0.13.12"
+...

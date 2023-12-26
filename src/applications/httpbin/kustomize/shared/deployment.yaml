@@ -1,0 +1,23 @@
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "httpbin"
+  namespace: "httpbin"
+spec:
+  selector:
+    matchLabels:
+      app: "httpbin"
+  template:
+    metadata:
+      labels:
+        app: "httpbin"
+    spec:
+      serviceAccountName: "httpbin"
+      containers:
+        - image: "docker.io/kong/httpbin"
+          imagePullPolicy: "IfNotPresent"
+          name: "httpbin"
+          ports:
+            - containerPort: 80
+...

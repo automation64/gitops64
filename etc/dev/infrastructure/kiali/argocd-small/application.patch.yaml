@@ -1,0 +1,45 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "kiali"
+  namespace: "argocd"
+spec:
+  source:
+    targetRevision: "1.78.0"
+    helm:
+      valuesObject:
+        auth:
+          strategy: "anonymous"
+        deployment:
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "64Mi"
+            limits:
+              memory: "512Mi"
+          logger:
+            # Supported values are "trace", "debug", "info", "warn", "error" and "fatal"
+            log_level: "warn"
+            # Supported values are "text" and "json".
+            log_format: "json"
+        login_token:
+          signing_key: ""
+        server:
+          metrics_enabled: true
+        istio_namespace: "istio-system"
+        external_services:
+            prometheus:
+              url: "http://prometheus-server.prometheus.svc.cluster.local:80/"
+            istio:
+              root_namespace: "istio-system"
+              component_status:
+                enabled: true
+                components:
+                  - app_label: "istio-ingress"
+                    is_core: true
+                    is_proxy: true
+                    namespace: "istio-ingress"
+        kiali_feature_flags:
+            istio_injection_action: false
+...

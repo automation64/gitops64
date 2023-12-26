@@ -1,0 +1,17 @@
+---
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "VirtualService"
+metadata:
+  name: "grafana"
+  namespace: "istio-ingress"
+spec:
+  gateways:
+    - "istio-ingress/istio-ingress"
+  http:
+    - name: "grafana"
+      route:
+        - destination:
+            host: "grafana.grafana.svc.cluster.local"
+            port:
+              number: 80
+...

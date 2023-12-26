@@ -1,0 +1,39 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "istio-ingress"
+  namespace: "argocd"
+spec:
+  source:
+    targetRevision: "1.20.0"
+    helm:
+      valuesObject:
+        podAnnotations:
+          sidecar.istio.io/agentLogLevel: "info"
+          sidecar.istio.io/logLevel: "info"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "300m"
+            memory: "512Mi"
+        autoscaling:
+          enabled: false
+        service:
+          type: LoadBalancer
+          ports:
+            - name: "status-port"
+              port: 15021
+              protocol: "TCP"
+              targetPort: 15021
+            - name: "http2"
+              port: 80
+              protocol: "TCP"
+              targetPort: 80
+            - name: "https"
+              port: 443
+              protocol: "TCP"
+              targetPort: 443
+...

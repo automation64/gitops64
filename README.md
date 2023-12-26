@@ -3,7 +3,7 @@
 - [Project: GITOps64](#project-gitops64)
   - [Overview](#overview)
     - [Directory structure](#directory-structure)
-    - [Modules](#modules)
+    - [Applications](#applications)
   - [Deployment](#deployment)
     - [Requirements](#requirements)
       - [Tools](#tools)
@@ -31,22 +31,14 @@ The main purpose is to provide ready-to-use deployment modules for popular Kuber
 - `var`: location for persistent runtime data (included in GIT)
 - `vault`: location for runtime secrets (excluded from GIT)
 
-### Modules
+### Applications
 
-- GitOps
-  - FluxCD
-  - ArgoCD
-  - Minikube
-- Infrastructure
-  - Certificate Manager
-  - Flagger
-  - GitHub
-  - Istio
-  - Metrics Server
-  - Prometheus
-  - Rook
-- Demo Applications
-  - HTTPBin
+Applications are organized based on type:
+
+- kubernetes: optional kubernetes components and APIs (e.g.: metrics-server, etc.)
+- infrastructure: infrastructure providing services to applications (e.g.: cert-manager, sealdersecrets, etc.)
+- applications: end-user applications
+- resources: non-application objects consumed by application and infrastructure (e.g.: certificates, storage, etc/)
 
 ## Deployment
 
@@ -58,9 +50,12 @@ Use the following procedure to deploy GitOps64 for testing purposes on a Minikub
 
 - GIT
 - KubeCTL
-- FluxCD
 - GitHub CLI
-- Minikube
+- Minikube or Kind
+- FluxCD or ArgoCD
+- Helm
+- Bash
+- Curl
 
 #### Infrastructure
 
@@ -68,6 +63,12 @@ Use the following procedure to deploy GitOps64 for testing purposes on a Minikub
 - Kubernetes cluster: target cluster that will be managed by GitOps
 
 ### Installation
+
+- Login to GitHub using the GH CLI
+
+```shell
+gh auth login
+```
 
 - Fork this repository to your GitHub account
 - Clone the forked repository to your workstation
@@ -91,23 +92,33 @@ var/fluxcd/*/flux-system
 ```
 
 - Review and update dev-environment configuration as needed: `etc/dev`
-- Deploy Minikube cluster
+- Deploy Kubernetes cluster
+  - Using minikube
 
-```shell
-./src/minikube/bl64/control -s -e dev &&
-./src/minikube/bl64/control -t -e dev
-```
+  ```shell
+  ./src/kubernetes/minikube/bl64/control -e dev -p medium -s &&
+  ./src/kubernetes/minikube/bl64/control -e dev -p medium -t
+  ```
 
-- Login to GitHub using the GH CLI
+  - Using kind
 
-```shell
-gh auth login
-```
+  ```shell
+  ./src/kubernetes/kind/bl64/control -e dev -p medium -s
+  ```
 
-- Deploy FluxCD to Minikube using GitHub
+- Deploy GitOps service to Minikube
+  - Using ArgoCD:
 
-```shell
-./src/fluxcd/bl64/control -b -e dev
+  ```shell
+  ./src/infrastructure/argocd/bl64/control-service -e dev -p nodeport -d &&
+  ./src/infrastructure/argocd/bl64/control-service -e dev -p nodeport -l &&
+  ./src/infrastructure/argocd/bl64/control-application -e dev -p nodeport -d
+  ```
+
+  - Using FluxCD:
+
+  ```shell
+  ./src/infrastructure/fluxcd/bl64/control -e dev -p minikube -b
 ```
 
 ## Contributing

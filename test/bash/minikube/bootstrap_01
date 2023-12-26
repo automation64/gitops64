@@ -2,6 +2,7 @@
 
 declare environment='dev'
 declare profile='medium'
+declare control='./src/kubernetes/minikube/bl64/control'
 
-./src/minikube/control -e "$environment" -p "$profile" -s &&
-  ./src/minikube/control -e "$environment" -p "$profile" -t
+"$control" -e "$environment" -p "$profile" -s &&
+  "$control" -e "$environment" -p "$profile" -t

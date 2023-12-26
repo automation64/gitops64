@@ -1,0 +1,10 @@
+---
+apiVersion: "metallb.io/v1beta1"
+kind: "IPAddressPool"
+metadata:
+  name: "metallb"
+  namespace: "metallb"
+spec:
+  addresses:
+    - "172.20.255.200-172.20.255.250"
+...

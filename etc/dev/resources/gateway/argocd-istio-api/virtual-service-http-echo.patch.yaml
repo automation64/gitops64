@@ -1,0 +1,10 @@
+---
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "VirtualService"
+metadata:
+  name: "http-echo"
+  namespace: "istio-ingress"
+spec:
+  hosts:
+    - "http-echo.gitops64"
+...

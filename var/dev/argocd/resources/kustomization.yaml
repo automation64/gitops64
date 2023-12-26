@@ -1,0 +1,17 @@
+---
+apiVersion: "kustomize.config.k8s.io/v1beta1"
+kind: "Kustomization"
+resources:
+  #
+  # Core resources
+  #
+  - "../../../../etc/dev/resources/ca-selfsigned/argocd"
+  #
+  # Gateway resources
+  #
+  - "../../../../etc/dev/resources/gateway/argocd-istio-api"
+  #
+  # Optional resources
+  #
+  # disabled # - "../../../../etc/dev/resources/innodb-shared/argocd"
+...
