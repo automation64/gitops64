@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 2.0.1
+# Version: 2.1.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -141,16 +141,18 @@ function argocd_control_deploy() {
   bl64_msg_show_task "store initial admin password (${ARGOCD_CONTROL_VAULT_ADMIN})"
   if [[ -f "$ARGOCD_CONTROL_VAULT_ADMIN" ]]; then
     bl64_msg_show_warning 'password already store. Reusing existting one'
+  else
     # shellcheck disable=SC2005
-    echo "$(
+    {
       bl64_k8s_run_kubectl \
         "$BL64_VAR_DEFAULT" \
         get secret \
         --namespace "$ARGOCD_CLUSTER_NAMESPACE" \
         --output jsonpath="{.data.password}" \
         "$admin_secret" |
-        bl64_txt_run_base64 --decode
-    )" >"$ARGOCD_CONTROL_VAULT_ADMIN"
+        bl64_txt_run_base64 --decode &&
+        echo
+     } >"$ARGOCD_CONTROL_VAULT_ADMIN"
   fi
 }
 

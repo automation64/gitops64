@@ -58,6 +58,7 @@ fi
   --ignore-times \
   --exclude='.vscode/' \
   --exclude='.git/' \
+  --exclude='vault/' \
   --exclude='tmp/' \
   --exclude='lib/' \
   "$dev_repo_source" \
