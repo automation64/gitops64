@@ -18,5 +18,5 @@ spec:
         - "grafana.gitops64"
         - "kiali.gitops64"
         - "k8s-dashboard.gitops64"
-        # disabled # - "wordpress-echo.gitops64"
+        # disabled # - "wordpress.gitops64"
 ...

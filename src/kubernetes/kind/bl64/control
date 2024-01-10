@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 1.0.0
+# Version: 1.1.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -51,6 +51,7 @@ function kind_control_kind_run() {
   bl64_dbg_app_trace_start
   # shellcheck disable=SC2154
   "$KIND_CLUSTER_CONTROL_KIND_BIN" \
+    --verbosity=2 \
     "$@"
   bl64_dbg_app_trace_stop
 }
@@ -78,7 +79,17 @@ function kind_control_cluster_show() {
   bl64_dbg_app_show_function
   bl64_k8s_run_kubectl \
     "$BL64_VAR_DEFAULT" \
-    cluster-info
+    cluster-info ||
+    return $?
+
+  printf '\nkubernetes nodes IP range: %s\n' \
+    "$(
+      bl64_cnt_cli \
+        network \
+        inspect \
+        -f '{{.IPAM.Config}}' \
+        kind
+    )"
 }
 
 #######################################
@@ -105,6 +116,7 @@ function kind_control_initialize() {
     { kind_control_help && return 1; }
 
   bl64_check_command "$KIND_CLUSTER_CONTROL_KIND_BIN" &&
+    bl64_cnt_setup &&
     bl64_k8s_setup ||
     return $?
 
