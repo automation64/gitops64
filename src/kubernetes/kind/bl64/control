@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 1.1.0
+# Version: 1.2.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -29,8 +29,16 @@
 # Imports
 #
 
-# shellcheck source=lib/bl64/bashlib64.bash
-source 'lib/bl64/bashlib64.bash' || { echo "Error: unable to load bashlib64" && exit 1; }
+# shellcheck source-path=lib/bl64
+source 'lib/bl64/bashlib64-module-fs.bash' &&
+  source 'lib/bl64/bashlib64-module-fmt.bash' &&
+  source 'lib/bl64/bashlib64-module-bsh.bash' &&
+  source 'lib/bl64/bashlib64-module-xsv.bash' &&
+  source 'lib/bl64/bashlib64-module-txt.bash' &&
+  source 'lib/bl64/bashlib64-module-ui.bash' &&
+  source 'lib/bl64/bashlib64-module-k8s.bash' &&
+  source 'lib/bl64/bashlib64-module-cnt.bash' &&
+  source 'lib/bl64/bashlib64-core.bash' || { echo "Error: unable to load bashlib64" && exit 1; }
 
 # shellcheck source=src/infrastructure/gitops64/bl64-lib/setup
 source 'src/infrastructure/gitops64/bl64-lib/setup' || { echo "Error: unable to load bashlib64" && exit 1; }
