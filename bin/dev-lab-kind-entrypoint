@@ -55,11 +55,18 @@ function dev_lab_credentials_set() {
   local caller_home="/home/${_DEV_LAB_KIND_CONTAINER_USER}"
 
   bl64_msg_show_task "import kubectl credentials (${_DEV_LAB_KIND_CONTAINER_USER} -> $(bl64_iam_user_get_current))"
-  bl64_rbac_run_command "$BL64_FS_CMD_MKDIR" "$caller_home" &&
-    bl64_rbac_run_command "$BL64_FS_CMD_CHMOD" 755 "$caller_home" &&
-    bl64_rbac_run_command "$BL64_FS_CMD_LN" -s "$DEV_ENV_KIND_CONTAINER_PATH_CREDENTIALS" "${caller_home}/.kube" &&
-    bl64_rbac_run_command "$BL64_FS_CMD_LN" -s "$DEV_ENV_KIND_CONTAINER_PATH_CREDENTIALS" "${HOME}/.kube" ||
+  bl64_rbac_run_command 'root' "$BL64_FS_CMD_MKDIR" "$caller_home" &&
+    bl64_rbac_run_command 'root' "$BL64_FS_CMD_CHMOD" 755 "$caller_home" &&
+    bl64_rbac_run_command 'root' "$BL64_FS_CMD_LN" -s "$DEV_ENV_KIND_CONTAINER_PATH_CREDENTIALS" "${caller_home}/.kube" &&
+    bl64_rbac_run_command 'root' "$BL64_FS_CMD_LN" -s "$DEV_ENV_KIND_CONTAINER_PATH_CREDENTIALS" "${HOME}/.kube" ||
     exit $?
+}
+
+function dev_lab_shell_open() {
+  bl64_dbg_app_show_function
+  bl64_msg_show_task 'open interactive shell'
+  bl64_msg_show_info 'type "exit" when done'
+  /bin/bash --login
 }
 
 function dev_lab_initialize() {
@@ -77,5 +84,5 @@ bl64_msg_all_enable_verbose
 bl64_msg_show_batch_start 'dev-lab-kind-entrypoint'
 dev_lab_initialize &&
   dev_lab_credentials_set &&
-  bash --login
+  dev_lab_shell_open &&
 bl64_msg_show_batch_finish $? 'dev-lab-kind-entrypoint'

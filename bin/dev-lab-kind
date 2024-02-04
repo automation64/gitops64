@@ -29,7 +29,10 @@ source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2
 # shellcheck source-path=bin
 source ./bin/dev-env-kind || exit 1
 # shellcheck source-path=lib/bl64
-source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-rnd.bash" &&
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fmt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-rnd.bash" &&
   source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-iam.bash" &&
   source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-cnt.bash" &&
   source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || exit 1
@@ -41,6 +44,9 @@ source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-rnd.bash" &&
 function dev_lab_open() {
   bl64_dbg_app_show_function "$@"
   local dev_lab_image="$1"
+
+  bl64_msg_show_warning "temporary opening kubeconfig path permissions (${DEV_ENV_KIND_PATH_KUBE})"
+  bl64_fs_fix_permissions '0644' '0755' "${DEV_ENV_KIND_PATH_KUBE}"
 
   bl64_msg_show_task "open sanbox environment (${dev_lab_image})"
   bl64_cnt_run_interactive \
@@ -54,6 +60,9 @@ function dev_lab_open() {
     --mount "type=bind,source=${DEV_PATH_VAULT},target=${DEV_ENV_KIND_CONTAINER_PATH_VAULT}" \
     --mount "type=bind,source=${DEV_ENV_KIND_PATH_KUBE},target=${DEV_ENV_KIND_CONTAINER_PATH_CREDENTIALS},readonly" \
     "${DEV_ENV_KIND_REGISTRY}/${dev_lab_image}"
+
+  bl64_msg_show_task "closing kubeconfig path permissions (${DEV_ENV_KIND_PATH_KUBE})"
+  bl64_fs_fix_permissions '0600' '0700' "${DEV_ENV_KIND_PATH_KUBE}"
 }
 
 function dev_lab_initialize() {
