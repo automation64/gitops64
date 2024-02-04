@@ -75,20 +75,14 @@ gh auth login
 
 ```shell
 git clone <FORKED_REPOSITORY>
-```
-
-- Create local environment files and update as needed
-
-```shell
 cd gitops64
-grep -v 'ACTION REQUIRED' dot.local > .local
-grep -v 'ACTION REQUIRED' dot.secrets > .secrets
 ```
 
 - Initialize dev time resources
 
 ```shell
-./bin/dev-lib
+./bin/dev-lib-local &&
+./bin/dev-lib-base
 ```
 
 - (FluxCD only) Turn off the following filter from `.gitignore` file:
@@ -102,6 +96,7 @@ var/fluxcd/*/flux-system
   - [FluxCD](etc/dev/infrastructure/argocd/bl64-nodeport/service.yaml)
   - [ArgoCD](etc/dev/infrastructure/fluxcd/bl64-minikube/cluster.yaml)
   - [GitHub](etc/dev/infrastructure/github/bl64-default/service.yaml)
+
 - Review and update enabled modules as needed: `var/<ENVIRONMENT>`:
   - FluxCD
     - [kubernetes](var/dev/argocd/kubernetes/)
@@ -112,6 +107,7 @@ var/fluxcd/*/flux-system
     - [infrastructure](var/dev/argocd/infrastructure/kustomization.yaml)
     - [resources](var/dev/argocd/resources/kustomization.yaml)
     - [applications](var/dev/argocd/applications/kustomization.yaml)
+
 - Deploy Kubernetes cluster
   - Using minikube
 
