@@ -29,17 +29,17 @@ spec:
           metrics_enabled: true
         istio_namespace: "istio-system"
         external_services:
-            prometheus:
-              url: "http://prometheus-server.prometheus.svc.cluster.local:80/"
-            istio:
-              root_namespace: "istio-system"
-              component_status:
-                enabled: true
-                components:
-                  - app_label: "istio-ingress"
-                    is_core: true
-                    is_proxy: true
-                    namespace: "istio-ingress"
+          prometheus:
+            url: "http://prometheus-server.prometheus.svc.cluster.local:80/"
+          istio:
+            root_namespace: "istio-system"
+            component_status:
+              enabled: true
+              components:
+                - app_label: "istio-ingress"
+                  is_core: true
+                  is_proxy: true
+                  namespace: "istio-ingress"
         kiali_feature_flags:
-            istio_injection_action: false
+          istio_injection_action: false
 ...
