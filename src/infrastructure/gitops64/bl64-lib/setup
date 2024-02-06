@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 2.1.0
+# Version: 3.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -26,19 +26,15 @@
 #######################################
 
 function gitops64_initialize() {
-  bl64_dbg_app_show_function
-  local configuration="etc/all/gitops64/setup.yaml"
+  bl64_dbg_app_show_function "$@"
+  local environment="$1"
+  local configuration='etc/all/gitops64/setup.yaml'
 
   bl64_msg_show_task 'initialize GitOps64 environment'
   bl64_check_file "$configuration" &&
     bl64_xsv_setup &&
     bl64_bsh_setup &&
-    bl64_bsh_env_import_yaml "$configuration" &&
-    bl64_check_export 'GITOPS64_PATH_ETC' &&
-    bl64_check_export 'GITOPS64_PATH_VAULT' &&
-    bl64_check_export 'GITOPS64_PATH_VAR' &&
-    bl64_check_export 'GITOPS64_PATH_SRC' &&
-    bl64_check_export 'GITOPS64_PATH_TMP'
+    bl64_bsh_env_import_yaml "$configuration"
 }
 
 # Required to prevent false positive on YAML generated shell-env
@@ -57,5 +53,5 @@ function gitops64_setup_load() {
 
   [[ "$profile" == "$BL64_VAR_DEFAULT" ]] && profile='default'
 
-  bl64_bsh_env_import_yaml "${GITOPS64_PATH_ETC}/${environment}/${module}/${GITOPS64_MODULE_ID_BASHLIB64}-${profile}/${setup_name}.yaml"
+  bl64_bsh_env_import_yaml "${DEV_PATH_ETC}/${environment}/${module}/${GITOPS64_MODULE_ID_BASHLIB64}-${profile}/${setup_name}.yaml"
 }

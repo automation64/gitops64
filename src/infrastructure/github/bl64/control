@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 2.0.0
+# Version: 3.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -29,11 +29,19 @@
 # Imports
 #
 
-# shellcheck source=lib/bl64/bashlib64.bash
-source 'lib/bl64/bashlib64.bash' || { echo "Error: unable to load bashlib64" && exit 1; }
+# shellcheck source=bin/dev-set
+source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
 
 # shellcheck source=src/infrastructure/gitops64/bl64-lib/setup
-source 'src/infrastructure/gitops64/bl64-lib/setup' || { echo "Error: unable to load bashlib64" && exit 1; }
+source "${DEV_PATH_SRC}/infrastructure/gitops64/bl64-lib/setup" || { echo "Error: unable to load gitops64 bash lib" && exit 1; }
+
+# shellcheck source-path=lib/bl64source
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fmt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-bsh.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-xsv.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
 
 #
 # Globals
@@ -65,7 +73,7 @@ function github_control_key_add() {
   local environment="$1"
   local repository="${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}"
   local key_title='GitOps64 Deployment SSH Key'
-  local key_private="${GITOPS64_PATH_VAULT}/${environment}/${GITOPS64_KEY_DEPLOYMENT_PRIVATE}"
+  local key_private="${DEV_PATH_VAULT}/${environment}/${GITOPS64_KEY_DEPLOYMENT_PRIVATE}"
 
   bl64_msg_show_task "generate deployment SSH key (${key_private})"
   if [[ -f "$key_private" ]]; then
@@ -138,7 +146,7 @@ function github_control_initialize() {
     bl64_check_command "$GITHUB_CONTROL_KEYGEN_BIN" ||
     return $?
 
-  gitops64_initialize &&
+  gitops64_initialize "$environment" &&
     gitops64_setup_load "$environment" 'infrastructure/github' "$profile" 'service' &&
     bl64_check_export 'GITHUB_REPOSITORY_NAME' &&
     bl64_check_export 'GITHUB_REPOSITORY_OWNER' &&

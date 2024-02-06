@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 2.1.0
+# Version: 3.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -29,11 +29,22 @@
 # Imports
 #
 
-# shellcheck source=lib/bl64/bashlib64.bash
-source 'lib/bl64/bashlib64.bash' || { echo "Error: unable to load bashlib64" && exit 1; }
+# shellcheck source=bin/dev-set
+source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
 
 # shellcheck source=src/infrastructure/gitops64/bl64-lib/setup
-source 'src/infrastructure/gitops64/bl64-lib/setup' || { echo "Error: unable to load bashlib64" && exit 1; }
+source "${DEV_PATH_SRC}/infrastructure/gitops64/bl64-lib/setup" || { echo "Error: unable to load gitops64 bash lib" && exit 1; }
+
+# shellcheck source-path=lib/bl64source
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-ui.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fmt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-bsh.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-xsv.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-hlm.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-k8s.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
 
 #
 # Globals
@@ -41,6 +52,7 @@ source 'src/infrastructure/gitops64/bl64-lib/setup' || { echo "Error: unable to 
 
 export ARGOCD_CONTROL_ARGOCD_BIN="${ARGOCD_CONTROL_ARGOCD_BIN:-/usr/local/bin/argocd}"
 export ARGOCD_CONTROL_GH_BIN="${ARGOCD_CONTROL_GH_BIN:-/usr/bin/gh}"
+export ARGOCD_CONTROL_KUBECONFIG_PATH="${ARGOCD_CONTROL_KUBECONFIG_PATH:-${HOME}/.kube/config}"
 
 declare ARGOCD_CONTROL_REPOSITORY_NAME='argo'
 declare ARGOCD_CONTROL_REPOSITORY_URL='https://argoproj.github.io/argo-helm'
@@ -120,7 +132,7 @@ function argocd_control_deploy() {
   local environment="$1"
   local profile="$2"
   local chart_source='argo/argo-cd'
-  local chart_values="${GITOPS64_PATH_ETC}/${environment}/infrastructure/argocd/${GITOPS64_MODULE_ID_BASHLIB64}-${profile}/chart-values.yaml"
+  local chart_values="${DEV_PATH_ETC}/${environment}/infrastructure/argocd/${GITOPS64_MODULE_ID_BASHLIB64}-${profile}/chart-values.yaml"
   local admin_secret='argocd-initial-admin-secret'
 
   bl64_check_file "$chart_values" ||
@@ -131,7 +143,7 @@ function argocd_control_deploy() {
 
   bl64_msg_show_task "deploy ArgoCD to Kubernetes Cluster (${environment})"
   bl64_hlm_chart_upgrade \
-    "${HOME}/.kube/config" \
+    "$ARGOCD_CONTROL_KUBECONFIG_PATH" \
     "$ARGOCD_CLUSTER_NAMESPACE" \
     "$ARGOCD_CONTROL_CHART_NAME" \
     "$chart_source" \
@@ -152,7 +164,7 @@ function argocd_control_deploy() {
         "$admin_secret" |
         bl64_txt_run_base64 --decode &&
         echo
-     } >"$ARGOCD_CONTROL_VAULT_ADMIN"
+    } >"$ARGOCD_CONTROL_VAULT_ADMIN"
   fi
 }
 
@@ -186,22 +198,21 @@ function argocd_control_initialize() {
     bl64_hlm_setup ||
     return $?
 
-  gitops64_initialize &&
+  gitops64_initialize "$environment" &&
     gitops64_setup_load 'all' 'argocd' "$profile" 'setup' &&
     gitops64_setup_load "$environment" 'infrastructure/argocd' "$profile" 'service' &&
     bl64_check_export 'ARGOCD_CLUSTER_CONTEXT' &&
     bl64_check_export 'ARGOCD_CLUSTER_NAMESPACE' &&
     bl64_check_export 'ARGOCD_GITOPS_REPOSITORY' ||
     return $?
-  ARGOCD_CONTROL_KEY_PRIVATE="${GITOPS64_PATH_VAULT}/${environment}/${GITOPS64_KEY_DEPLOYMENT_PRIVATE}"
-  ARGOCD_CONTROL_VAULT_ADMIN="${GITOPS64_PATH_VAULT}/${environment}/${ARGOCD_ADMIN_VAULT}"
+
+  ARGOCD_CONTROL_KEY_PRIVATE="${DEV_PATH_VAULT}/${environment}/${GITOPS64_KEY_DEPLOYMENT_PRIVATE}"
+  ARGOCD_CONTROL_VAULT_ADMIN="${DEV_PATH_VAULT}/${environment}/${ARGOCD_ADMIN_VAULT}"
 
   if [[ "$command" == 'secret_ssh_add' ]]; then
-    bl64_check_file "$ARGOCD_CONTROL_KEY_PRIVATE" 'missing deploy key file. Please generate one and retry' ||
-      return $?
+    bl64_check_file "$ARGOCD_CONTROL_KEY_PRIVATE" 'missing deploy key file. Please generate one and retry'
   elif [[ "$command" == 'login' ]]; then
-    bl64_check_file "$ARGOCD_CONTROL_VAULT_ADMIN" 'missing admin password file. Please generate one and retry' ||
-      return $?
+    bl64_check_file "$ARGOCD_CONTROL_VAULT_ADMIN" 'missing admin password file. Please generate one and retry'
   fi
 }
 
@@ -265,7 +276,7 @@ argocd_control_initialize "$argocd_control_command" "$argocd_control_environment
 
 bl64_msg_show_batch_start "$argocd_control_command"
 case "$argocd_control_command" in
-'deploy' ) "argocd_control_${argocd_control_command}" "$argocd_control_environment" "$argocd_control_profile";;
+'deploy') "argocd_control_${argocd_control_command}" "$argocd_control_environment" "$argocd_control_profile" ;;
 'remove' | 'login') "argocd_control_${argocd_control_command}" "$argocd_control_environment" ;;
 'secret_ssh_add') "argocd_control_${argocd_control_command}" "$argocd_control_environment" ;;
 *) bl64_check_alert_parameter_invalid "$argocd_control_command" ;;

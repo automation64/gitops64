@@ -52,10 +52,11 @@ Use the following procedure to deploy GitOps64 for testing purposes on a Minikub
 - KubeCTL
 - GitHub CLI
 - Minikube or Kind
-- FluxCD or ArgoCD
-- Helm
+- FluxCD or ArgoCD CLI
+- Helm CLI
 - Bash
 - Curl
+- YamlQuery (yq)
 
 #### Infrastructure
 
@@ -92,16 +93,16 @@ cd gitops64
 var/fluxcd/*/flux-system
 ```
 
-- Review and update dev-environment configuration as needed: `etc/<ENVIRONMENT>`:
+- Review and update dev-environment configuration as needed: `etc/<ENVIRONMENT>`, in particular values marked with replacement tags `X_..._X`
   - [FluxCD](etc/dev/infrastructure/argocd/bl64-nodeport/service.yaml)
   - [ArgoCD](etc/dev/infrastructure/fluxcd/bl64-minikube/cluster.yaml)
   - [GitHub](etc/dev/infrastructure/github/bl64-default/service.yaml)
 
-- Review and update enabled modules as needed: `var/<ENVIRONMENT>`:
+- Review and update enabled modules: `var/<ENVIRONMENT>`:
   - FluxCD
-    - [kubernetes](var/dev/argocd/kubernetes/)
-    - [infrastructure](var/dev/argocd/infrastructure/)
-    - [applications](var/dev/argocd/applications/)
+    - [kubernetes](var/dev/fluxcd/kubernetes/)
+    - [infrastructure](var/dev/fluxcd/infrastructure/)
+    - [applications](var/dev/fluxcd/applications/)
   - ArgoCD
     - [kubernetes](var/dev/argocd/kubernetes/kustomization.yaml)
     - [infrastructure](var/dev/argocd/infrastructure/kustomization.yaml)
@@ -112,17 +113,18 @@ var/fluxcd/*/flux-system
   - Using minikube
 
   ```shell
-  ./src/kubernetes/minikube/bl64/control -e dev -p medium -s &&
-  ./src/kubernetes/minikube/bl64/control -e dev -p medium -t
+  ./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -s &&
+  ./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -t
   ```
 
   - Using kind
 
   ```shell
-  ./src/kubernetes/kind/bl64/control -e dev -p medium -s
+  ./src/kubernetes/kind/bl64/control -e dev -p medium -s &&
+  ./src/kubernetes/kind/bl64/control -o dev -p medium -s
   ```
 
-- Deploy GitOps service to Minikube
+- Deploy GitOps service to Kubernetes
   - Using ArgoCD:
 
   ```shell
@@ -134,8 +136,8 @@ var/fluxcd/*/flux-system
   - Using FluxCD:
 
   ```shell
-  ./src/infrastructure/fluxcd/bl64/control -e dev -p minikube -b
-```
+  ./src/infrastructure/fluxcd/bl64/control -e dev -p github -b
+  ```
 
 ## Contributing
 

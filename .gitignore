@@ -1,5 +1,3 @@
-
-
 #
 # GIT Ignore
 #
@@ -27,6 +25,9 @@
 #
 # Project specific exclusions
 #
+
+# Runtime secrets
+/vault/*/*
 
 # FluxCD / Upstream only: do not save FluxCD deployment
 /var/dev/fluxcd/flux-system/*

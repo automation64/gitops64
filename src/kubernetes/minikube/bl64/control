@@ -29,11 +29,21 @@
 # Imports
 #
 
-# shellcheck source=lib/bl64/bashlib64.bash
-source 'lib/bl64/bashlib64.bash' || { echo "Error: unable to load bashlib64" && exit 1; }
+# shellcheck source=bin/dev-set
+source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
 
 # shellcheck source=src/infrastructure/gitops64/bl64-lib/setup
-source 'src/infrastructure/gitops64/bl64-lib/setup' || { echo "Error: unable to load bashlib64" && exit 1; }
+source "${DEV_PATH_SRC}/infrastructure/gitops64/bl64-lib/setup" || { echo "Error: unable to load gitops64 bash lib" && exit 1; }
+
+# shellcheck source-path=lib/bl64source
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-bsh.bash" &&
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-xsv.bash" &&
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fmt.bash" &&
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-ui.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-k8s.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
 
 #
 # Globals
@@ -187,9 +197,25 @@ function minikube_control_cluster_start() {
   case "$MINIKUBE_CLUSTER_DRIVER_NAME" in
   'virtualbox') minikube_control_cluster_start_virtualbox ;;
   'kvm2') minikube_control_cluster_start_kvm2 ;;
+  'docker') minikube_control_cluster_start_docker ;;
   *) bl64_check_alert_parameter_invalid "$MINIKUBE_CLUSTER_DRIVER_NAME" ;;
   esac &&
     minikube_control_addon_enable
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function minikube_control_cluster_start_docker() {
+  bl64_dbg_app_show_function
+  minikube_control_minikube_run \
+    start \
+    --interactive=false \
+    --install-addons=false \
+    --cni="$MINIKUBE_CLUSTER_CNI_DRIVER" \
+    --nodes="$MINIKUBE_K8S_SIZE_NODES" \
+    --disk-size="$MINIKUBE_K8S_SIZE_DISK_SIZE" \
+    --driver="$MINIKUBE_CLUSTER_DRIVER_NAME" \
+    --kubernetes-version="$MINIKUBE_K8S_VERSION"
 }
 
 # Required to prevent false positive on YAML generated shell-env
@@ -284,11 +310,9 @@ function minikube_control_initialize() {
     bl64_k8s_setup ||
     return $?
 
-  gitops64_initialize &&
+  gitops64_initialize "$environment" &&
     gitops64_setup_load "$environment" 'kubernetes/minikube' "$profile" 'cluster' &&
-    bl64_check_export 'MINIKUBE_K8S_SIZE_CPUS' &&
     bl64_check_export 'MINIKUBE_K8S_SIZE_DISK_SIZE' &&
-    bl64_check_export 'MINIKUBE_K8S_SIZE_MEMORY' &&
     bl64_check_export 'MINIKUBE_K8S_SIZE_NODES' &&
     bl64_check_export 'MINIKUBE_K8S_VERSION' &&
     bl64_check_export 'MINIKUBE_CLUSTER_DRIVER_NAME' &&

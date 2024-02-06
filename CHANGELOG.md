@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0]
+
+### Changed
+
+- ArgoCD
+  - Migrated to modular bl64
+- FluxCD
+  - Migrated to modular bl64
+- GitHub
+  - Migrated to modular bl64
+- GitOps64
+  - Migrated to modular bl64
+- NGINX
+  - Migrated to modular bl64
+- Kind
+  - Migrated to modular bl64
+- Minikube
+  - Migrated to modular bl64
+
 ## [3.1.0]
 
 ### Added
@@ -132,6 +151,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
+[3.2.0]: https://github.com/automation64/gitops64/compare/3.1.0...3.2.0
 [3.1.0]: https://github.com/automation64/gitops64/compare/3.0.0...3.1.0
 [3.0.0]: https://github.com/automation64/gitops64/compare/2.0.0...3.0.0
 [2.0.0]: https://github.com/automation64/gitops64/compare/1.0.0...2.0.0

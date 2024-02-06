@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 2.0.0
+# Version: 3.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -29,11 +29,21 @@
 # Imports
 #
 
-# shellcheck source=lib/bl64/bashlib64.bash
-source 'lib/bl64/bashlib64.bash' || { echo "Error: unable to load bashlib64" && exit 1; }
+# shellcheck source=bin/dev-set
+source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
 
 # shellcheck source=src/infrastructure/gitops64/bl64-lib/setup
-source 'src/infrastructure/gitops64/bl64-lib/setup' || { echo "Error: unable to load bashlib64" && exit 1; }
+source "${DEV_PATH_SRC}/infrastructure/gitops64/bl64-lib/setup" || { echo "Error: unable to load gitops64 bash lib" && exit 1; }
+
+# shellcheck source-path=lib/bl64
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-ui.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fmt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-bsh.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-xsv.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-k8s.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
 
 #
 # Globals
@@ -41,6 +51,7 @@ source 'src/infrastructure/gitops64/bl64-lib/setup' || { echo "Error: unable to 
 
 export ARGOCD_CONTROL_ARGOCD_BIN="${ARGOCD_CONTROL_ARGOCD_BIN:-/usr/local/bin/argocd}"
 export ARGOCD_CONTROL_MANIFESTS='kubernetes infrastructure resources applications'
+export ARGOCD_CONTROL_KUBECONFIG_PATH="${ARGOCD_CONTROL_KUBECONFIG_PATH:-${HOME}/.kube/config}"
 
 #
 # Functions
@@ -104,7 +115,7 @@ function argocd_control_deploy() {
   bl64_dbg_app_show_function "$@"
   local environment="$1"
   local target=''
-  local runtime_path="${GITOPS64_PATH_VAR}/${environment}/argocd"
+  local runtime_path="${DEV_PATH_VAR}/${environment}/argocd"
   local kustomization=''
 
   for target in $ARGOCD_CONTROL_MANIFESTS; do
@@ -112,7 +123,7 @@ function argocd_control_deploy() {
     [[ ! -f "${kustomization}/kustomization.yaml" ]] && continue
     bl64_msg_show_task "deploy application definition group (${target})"
     bl64_k8s_run_kubectl \
-      "$BL64_VAR_DEFAULT" \
+      "$ARGOCD_CONTROL_KUBECONFIG_PATH" \
       apply \
       --overwrite='true' \
       --validate='strict' \
@@ -148,7 +159,7 @@ function argocd_control_initialize() {
     bl64_k8s_setup ||
     return $?
 
-  gitops64_initialize &&
+  gitops64_initialize "$environment" &&
     gitops64_setup_load 'all' 'argocd' "$profile" 'setup' &&
     gitops64_setup_load "$environment" 'infrastructure/argocd' "$profile" 'service' &&
     bl64_check_export 'ARGOCD_CLUSTER_NAMESPACE' ||

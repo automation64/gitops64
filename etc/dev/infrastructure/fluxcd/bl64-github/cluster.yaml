@@ -4,8 +4,8 @@ version: "1.0.0"
 fluxcd:
   timeout: "10m"
   cluster:
-    owner: "itc64-dev"
-    repository: "fluxcd-test"
+    owner: "X_GITHUB_REPO_OWNER_X"
+    repository: "test-gitops"
     branch: "main"
     path: "var/dev/fluxcd"
     context: "dev"
