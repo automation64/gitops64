@@ -10,7 +10,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/installer64
-# Version: 1.3.0
+# Version: 1.3.1
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -75,11 +75,12 @@ function dev_bootstrap_dot_env_create() {
   # shellcheck disable=SC2016,SC1078
   printf '#!/usr/bin/env bash
 #
-# Development environmen / Variables
+# Development environment / Global variables
 #
+# * Used by DevBin64 to define project wide variables
 # * Automatically loaded by dev-set
-# * Do not include local variables and secrets. Use .local and .secrets instead
-# * Version: 3.1.1
+# * Do not include local variables (workstation specific) and secrets. Use .local and .secrets instead
+# * Version: 3.1.2
 #
 
 # Main / Base file and directory names
@@ -200,7 +201,7 @@ function dev_bootstrap_gitignore_create() {
 #
 # GIT Ignore
 #
-# * Template version: 1.2.0
+# * Template version: 1.2.1
 #
 
 # VScode
@@ -221,12 +222,12 @@ function dev_bootstrap_gitignore_create() {
 # Local variables
 /.local
 
-# Keep placeholder for empty directories
-!/**/.gitkeep
-
 #
 # Project specific exclusions
 #
+
+# Keep placeholder for empty directories
+!/**/.gitkeep
 ' \
     >'.gitignore' &&
     touch \

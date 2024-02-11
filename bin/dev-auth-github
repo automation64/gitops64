@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 #######################################
-# Dev / Test / TestManSH / Test bash scripts
+# Dev / Auth / GitHug / Login
 #
-# * Test cases are done using bats-core
-# * TestManSH is used to manage test environment
-# * Tests are located in the default path "test/batscore"
-# * Version: 3.0.1
+# * Version: 1.2.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -30,49 +27,45 @@
 # shellcheck source=bin/dev-set
 source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
 # shellcheck source-path=bin
-source ./bin/dev-env-testmansh || exit 1
-# shellcheck source=lib/bl64/bashlib64-core.bash
+source ./bin/dev-env-github || exit 1
+# shellcheck source-path=lib/bl64
 source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || exit 1
+
+#
+# Globals
+#
+
+# Auth / GitHub / Scopes
+export DEV_AUTH_GITHUB_SCOPES="${DEV_AUTH_GITHUB_SCOPES:-}"
+# Auth / GitHub / Token
+export GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 
 #
 # Functions
 #
 
-function dev_test_bash() {
-  bl64_dbg_app_show_function "$@"
-  local container="$1"
-  shift
-  local target="$*"
-  local current=''
-
-  [[ -z "$target" ]] && target="$DEV_TEST_TESTMANSH_CASES"
-  for current in $target; do
-    bl64_msg_show_phase "test target: ${current}"
-    "$DEV_LIB_TESTMANSH_BIN" \
-      -b -a -V 'NONE' \
-      -e "$container" \
-      -c "$target" ||
-      return $?
-  done
+function dev_auth_github() {
+  bl64_dbg_app_show_function
+  [[ -z "$GITHUB_TOKEN" ]] && bl64_msg_show_warning 'variable GITHUB_TOKEN is unset, using interactive login'
+  "$DEV_LIB_GITHUB_BIN" \
+    auth login \
+    --scopes "$DEV_AUTH_GITHUB_SCOPES"
 }
 
-function dev_test_initialize() {
+function dev_auth_initialize() {
   bl64_dbg_app_show_function
-  bl64_check_command_search_path "$DEV_LIB_TESTMANSH_BIN"
+  bl64_check_command_search_path "$DEV_LIB_GITHUB_BIN" ||
+    return $?
 }
 
 #
 # Main
 #
 
-declare dev_test_container="${1:-${DEV_TEST_TESTMANSH_CONTAINER}}"
-shift
-declare dev_test_target="${*:-}"
-
 [[ -n "$DEV_CICD_DEBUG" ]] && bl64_dbg_all_enable
 
 bl64_msg_all_enable_verbose
-bl64_msg_show_batch_start 'dev-test-bash'
-dev_test_initialize &&
-  dev_test_bash "$dev_test_container" "$dev_test_target"
-bl64_msg_show_batch_finish $? 'dev-test-bash'
+bl64_msg_show_batch_start 'dev-auth-github'
+dev_auth_initialize &&
+  dev_auth_github
+bl64_msg_show_batch_finish $? 'dev-auth-github'
