@@ -5,6 +5,7 @@ metadata:
   name: "metallb"
   namespace: "metallb"
 spec:
+  # Warning: must be part of the Kind docker network (IPAM.Config)
   addresses:
-    - "172.20.255.200-172.20.255.250"
+    - "X_METALLB_IP_POOL_START_X-X_METALLB_IP_POOL_END_X"
 ...
