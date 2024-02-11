@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0]
+
+### Added
+
+- HTTPBin
+  - argocd: added LoadBalancer profile
+- Kind
+  - bl64/control: added default network ranges
+
+### Changed
+
+- ArgoCD
+  - bl64/control: **breaking change** normalize parameters: -c: create, -s: show, -d: destroy
+- FluxCD
+  - bl64/control: **breaking change** normalize parameters: -c: create, -s: show, -d: destroy
+- NGINX
+  - bl64/control: **breaking change** normalize parameters: -c: create, -s: show, -d: destroy
+- Kind
+  - bl64/control: **breaking change** normalize parameters: -c: create, -s: show, -d: destroy
+  - bl64/control: added default network ranges
+- Minikube
+  - bl64/control: **breaking change** normalize parameters: -c: create, -s: show, -d: destroy
+- GitOps64
+  - Minimized list of services enabled by default to simplify initial setup
+
 ## [3.2.0]
 
 ### Changed
@@ -151,6 +176,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
+[3.3.0]: https://github.com/automation64/gitops64/compare/3.2.0...3.3.0
 [3.2.0]: https://github.com/automation64/gitops64/compare/3.1.0...3.2.0
 [3.1.0]: https://github.com/automation64/gitops64/compare/3.0.0...3.1.0
 [3.0.0]: https://github.com/automation64/gitops64/compare/2.0.0...3.0.0
