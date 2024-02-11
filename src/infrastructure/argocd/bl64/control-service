@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 3.0.0
+# Version: 4.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -228,11 +228,11 @@ function argocd_control_initialize() {
 #######################################
 function argocd_control_help() {
   bl64_msg_show_usage \
-    '<-d|-r|-k|-l> -e Environment [-p Profile] [-V Verbose] [-D Debug] [-h]' \
+    '<-c|-d|-k|-l> -e Environment [-p Profile] [-V Verbose] [-D Debug] [-h]' \
     'Manage ArgoCD service deployment' \
     '
-    -d            : Deploy ArgoCD to Kubernetes Cluster
-    -r            : Remove ArgoCD from Kubernetes Cluster
+    -c            : Deploy ArgoCD to Kubernetes Cluster
+    -d            : Remove ArgoCD from Kubernetes Cluster
     -k            : Register private GIT repository
     -l            : Login to ArgoCD server
     ' '
@@ -257,10 +257,10 @@ declare argocd_control_environment="$BL64_VAR_NULL"
 declare argocd_control_profile="$BL64_VAR_DEFAULT"
 
 (($# == 0)) && argocd_control_help && exit 1
-while getopts ':drlke:p:V:D:h' argocd_control_option; do
+while getopts ':cdlke:p:V:D:h' argocd_control_option; do
   case "$argocd_control_option" in
-  d) argocd_control_command='deploy' ;;
-  r) argocd_control_command='remove' ;;
+  c) argocd_control_command='deploy' ;;
+  d) argocd_control_command='remove' ;;
   l) argocd_control_command='login' ;;
   k) argocd_control_command='secret_ssh_add' ;;
   e) argocd_control_environment="$OPTARG" ;;
