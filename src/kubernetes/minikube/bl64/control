@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 2.0.0
+# Version: 3.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -121,7 +121,7 @@ function minikube_control_certificate_approve() {
   local wait=5
 
   bl64_msg_show_task 'wait for new certificate requests'
-  sleep "$wait"
+  bl64_os_run_sleep "$wait"
   while [[ -z "$certificate_list" ]]; do
     certificate_list="$(
       bl64_k8s_run_kubectl "$BL64_VAR_DEFAULT" \
@@ -162,7 +162,7 @@ function minikube_control_certificate_deploy() {
     return $?
 
   node_kubelet="$(bl64_fs_create_tmpfile)"
-  sleep "$wait"
+  bl64_os_run_sleep "$wait"
   for node in $node_list; do
     bl64_msg_show_task "update node kubelet (${node})"
 
@@ -181,7 +181,7 @@ function minikube_control_certificate_deploy() {
     minikube_control_node_restart "$node"
     status=$?
     ((status != 0)) && break
-    sleep "$wait"
+    bl64_os_run_sleep "$wait"
 
   done
   bl64_fs_rm_tmpfile "$node_kubelet"
@@ -332,11 +332,11 @@ function minikube_control_initialize() {
 #######################################
 function minikube_control_help() {
   bl64_msg_show_usage \
-    '<-s|-o|-u|-d|-t> -e Environment [-p Profile] [-V Verbose] [-D Debug] [-h]' \
+    '<-c|-s|-u|-d|-t> -e Environment [-p Profile] [-V Verbose] [-D Debug] [-h]' \
     'Minikube cluster control wrapper' \
     '
-    -s            : Start cluster
-    -o            : Show cluster details
+    -c            : Start cluster
+    -s            : Show cluster details
     -u            : Stop cluster
     -d            : Delete (destroy) cluster
     -t            : Deploy Node Certificate
@@ -362,10 +362,10 @@ declare minikube_control_environment="$BL64_VAR_NULL"
 declare minikube_control_profile="$BL64_VAR_DEFAULT"
 
 (($# == 0)) && minikube_control_help && exit 1
-while getopts ':soudte:p:V:D:h' minikube_control_option; do
+while getopts ':csudte:p:V:D:h' minikube_control_option; do
   case "$minikube_control_option" in
-  s) minikube_control_command='cluster_start' ;;
-  o) minikube_control_command='cluster_show' ;;
+  c) minikube_control_command='cluster_start' ;;
+  s) minikube_control_command='cluster_show' ;;
   u) minikube_control_command='cluster_stop' ;;
   d) minikube_control_command='cluster_delete' ;;
   t) minikube_control_command='certificate_deploy' ;;

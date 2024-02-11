@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 2.0.0
+# Version: 3.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -78,22 +78,33 @@ function kind_control_cluster_start() {
 
 function kind_control_cluster_delete() {
   bl64_dbg_app_show_function
+  local network_kind='kind'
   bl64_ui_ask_confirmation \
     'Do you want to completely destroy the cluster?. Confirm by typing:' \
     'YES' &&
     kind_control_kind_run \
       delete cluster \
       --name "$KIND_CLUSTER_NAME"
+
+  if bl64_cnt_network_is_defined "$network_kind"; then
+    bl64_cnt_cli \
+      network \
+      rm \
+      "$network_kind"
+  fi
+  return 0
 }
 
 function kind_control_cluster_show() {
   bl64_dbg_app_show_function
+  bl64_msg_show_info 'cluster configuration'
   bl64_k8s_run_kubectl \
     "$BL64_VAR_DEFAULT" \
     cluster-info ||
     return $?
 
-  printf '\nkubernetes nodes IP range: %s\n' \
+  bl64_msg_show_info 'kubernetes nodes IP range'
+  printf '\nIPAM.Config: %s\n' \
     "$(
       bl64_cnt_cli \
         network \
@@ -153,11 +164,11 @@ function kind_control_initialize() {
 #######################################
 function kind_control_help() {
   bl64_msg_show_usage \
-    '<-s|-o|-d> -e Environment [-p Profile] [-V Verbose] [-D Debug] [-h]' \
+    '<-c|-s|-d> -e Environment [-p Profile] [-V Verbose] [-D Debug] [-h]' \
     'Minikube cluster control wrapper' \
     '
-    -s            : Start cluster
-    -o            : Show cluster details
+    -c            : Start cluster
+    -s            : Show cluster details
     -d            : Delete (destroy) cluster
     ' '
     -h            : Show help
@@ -181,10 +192,10 @@ declare kind_control_environment="$BL64_VAR_NULL"
 declare kind_control_profile="$BL64_VAR_DEFAULT"
 
 (($# == 0)) && kind_control_help && exit 1
-while getopts ':sode:p:V:D:h' kind_control_option; do
+while getopts ':csde:p:V:D:h' kind_control_option; do
   case "$kind_control_option" in
-  s) kind_control_command='cluster_start' ;;
-  o) kind_control_command='cluster_show' ;;
+  c) kind_control_command='cluster_start' ;;
+  s) kind_control_command='cluster_show' ;;
   d) kind_control_command='cluster_delete' ;;
   e) kind_control_environment="$OPTARG" ;;
   p) kind_control_profile="$OPTARG" ;;
