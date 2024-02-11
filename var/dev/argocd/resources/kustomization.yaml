@@ -9,7 +9,7 @@ resources:
   #
   # Gateway resources
   #
-  - "../../../../etc/dev/resources/gateway/argocd-istio-api"
+  # disabled # - "../../../../etc/dev/resources/gateway/argocd-istio-api"
   #
   # Optional resources
   #

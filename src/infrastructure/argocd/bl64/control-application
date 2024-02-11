@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 3.0.0
+# Version: 4.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -128,7 +128,8 @@ function argocd_control_deploy() {
       --overwrite='true' \
       --validate='strict' \
       --wait='true' \
-      --kustomize "$kustomization"
+      --kustomize "$kustomization" &&
+      bl64_os_run_sleep 10
   done
 }
 
@@ -183,14 +184,14 @@ function argocd_control_initialize() {
 #######################################
 function argocd_control_help() {
   bl64_msg_show_usage \
-    '<-l|-s|-d|-u|-t> -e Environment [-p Profile] [-i AppID] [-V Verbose] [-D Debug] [-h]' \
+    '<-l|-y|-c|-s|-d> -e Environment [-p Profile] [-i AppID] [-V Verbose] [-D Debug] [-h]' \
     'Manage ArgoCD applications' \
     '
     -l            : List applications
-    -s            : Sync application
-    -d            : Deploy defined applications
-    -u            : Show application status
-    -t            : Delete application and related resources
+    -y            : Sync application
+    -c            : Deploy defined applications
+    -s            : Show application status
+    -d            : Delete application and related resources
     ' '
     -h            : Show help
     ' '
@@ -215,13 +216,13 @@ declare argocd_control_profile="$BL64_VAR_DEFAULT"
 declare argocd_control_app_id="$BL64_VAR_NULL"
 
 (($# == 0)) && argocd_control_help && exit 1
-while getopts ':lsdute:p:i:V:D:h' argocd_control_option; do
+while getopts ':lycsde:p:i:V:D:h' argocd_control_option; do
   case "$argocd_control_option" in
   l) argocd_control_command='list' ;;
-  s) argocd_control_command='sync' ;;
-  d) argocd_control_command='deploy' ;;
-  u) argocd_control_command='status' ;;
-  t) argocd_control_command='delete' ;;
+  y) argocd_control_command='sync' ;;
+  c) argocd_control_command='deploy' ;;
+  s) argocd_control_command='status' ;;
+  d) argocd_control_command='delete' ;;
   e) argocd_control_environment="$OPTARG" ;;
   p) argocd_control_profile="$OPTARG" ;;
   i) argocd_control_app_id="$OPTARG" ;;

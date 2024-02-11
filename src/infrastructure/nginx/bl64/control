@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 2.0.0
+# Version: 3.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -133,11 +133,11 @@ function nginx_control_initialize() {
 #######################################
 function nginx_control_help() {
   bl64_msg_show_usage \
-    '<-s|-o|-d> -e Environment [-p Profile] [-V Verbose] [-D Debug] [-h]' \
+    '<-c|-s|-d> -e Environment [-p Profile] [-V Verbose] [-D Debug] [-h]' \
     'NGINX reverse proxy control wrapper' \
     '
-    -s            : Start proxy
-    -o            : Show proxy details
+    -c            : Start proxy
+    -s            : Show proxy details
     -d            : Delete (destroy) proxy
     ' '
     -h            : Show help
@@ -161,10 +161,10 @@ declare nginx_control_environment="$BL64_VAR_NULL"
 declare nginx_control_profile="$BL64_VAR_DEFAULT"
 
 (($# == 0)) && nginx_control_help && exit 1
-while getopts ':sode:p:V:D:h' nginx_control_option; do
+while getopts ':csde:p:V:D:h' nginx_control_option; do
   case "$nginx_control_option" in
-  s) nginx_control_command='proxy_start' ;;
-  o) nginx_control_command='proxy_show' ;;
+  c) nginx_control_command='proxy_start' ;;
+  s) nginx_control_command='proxy_show' ;;
   d) nginx_control_command='proxy_delete' ;;
   e) nginx_control_environment="$OPTARG" ;;
   p) nginx_control_profile="$OPTARG" ;;

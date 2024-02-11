@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 3.0.0
+# Version: 4.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -150,11 +150,11 @@ function fluxcd_control_initialize() {
 #######################################
 function fluxcd_control_help() {
   bl64_msg_show_usage \
-    '<-b|-u> -e Environment [-p Profile] [-V Verbose] [-D Debug] [-h]' \
+    '<-c|-d> -e Environment [-p Profile] [-V Verbose] [-D Debug] [-h]' \
     'Manage FluxCD service deployment' \
     '
-    -b            : Bootstrap (install) FluxCD to the target environment using GitHub
-    -u            : Uninstall FluxCD from cluster
+    -c            : Bootstrap (install) FluxCD to the target environment using GitHub
+    -d            : Uninstall FluxCD from cluster
     ' '
     -h            : Show help
     ' '
@@ -177,10 +177,10 @@ declare fluxcd_control_environment="$BL64_VAR_NULL"
 declare fluxcd_control_profile="$BL64_VAR_DEFAULT"
 
 (($# == 0)) && fluxcd_control_help && exit 1
-while getopts ':bue:p:V:D:h' fluxcd_control_option; do
+while getopts ':cde:p:V:D:h' fluxcd_control_option; do
   case "$fluxcd_control_option" in
-  b) fluxcd_control_command='bootstrap' ;;
-  u) fluxcd_control_command='uninstall' ;;
+  c) fluxcd_control_command='bootstrap' ;;
+  d) fluxcd_control_command='uninstall' ;;
   e) fluxcd_control_environment="$OPTARG" ;;
   p) fluxcd_control_profile="$OPTARG" ;;
   V) fluxcd_control_verbose="$OPTARG" ;;

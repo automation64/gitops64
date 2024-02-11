@@ -10,3 +10,6 @@
 
 # Lib / YAML / Command
 export DEV_LIB_YAMLLINT_BIN='yamllint'
+
+# Lib / Go / Command
+export DEV_LIB_GO_BIN='go'
