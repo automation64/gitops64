@@ -9,6 +9,9 @@
       - [Tools](#tools)
       - [Infrastructure](#infrastructure)
     - [Installation](#installation)
+  - [Operation](#operation)
+    - [Remove NGINX proxy](#remove-nginx-proxy)
+    - [Remove Kind K8S cluster](#remove-kind-k8s-cluster)
   - [Contributing](#contributing)
   - [License](#license)
   - [Author](#author)
@@ -48,15 +51,17 @@ Use the following procedure to deploy GitOps64 for testing purposes on a Minikub
 
 #### Tools
 
-- GIT
-- KubeCTL
-- GitHub CLI
-- Minikube or Kind
-- FluxCD or ArgoCD CLI
-- Helm CLI
-- Bash
-- Curl
-- YamlQuery (yq)
+- Core
+  - GIT
+  - KubeCTL
+  - Bash
+  - Curl
+  - YamlQuery (yq)
+  - GitHub CLI
+  - Minikube or Kind
+- GitOps
+  - FluxCD or ArgoCD CLI
+  - Helm CLI
 
 #### Infrastructure
 
@@ -109,35 +114,59 @@ var/fluxcd/*/flux-system
     - [resources](var/dev/argocd/resources/kustomization.yaml)
     - [applications](var/dev/argocd/applications/kustomization.yaml)
 
-- Deploy Kubernetes cluster
-  - Using minikube
+- Create dev/test environment
+  - Using Minikube
 
   ```shell
-  ./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -s &&
-  ./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -t
+  ./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -c &&
+  ./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -s
   ```
 
-  - Using kind
+  - Using Kind
 
   ```shell
-  ./src/kubernetes/kind/bl64/control -e dev -p medium -s &&
-  ./src/kubernetes/kind/bl64/control -o dev -p medium -s
+  ./src/kubernetes/kind/bl64/control -e dev -p medium -c &&
+  ./src/kubernetes/kind/bl64/control -e dev -p medium -s
   ```
 
 - Deploy GitOps service to Kubernetes
   - Using ArgoCD:
 
   ```shell
-  ./src/infrastructure/argocd/bl64/control-service -e dev -p nodeport -d &&
+  ./src/infrastructure/argocd/bl64/control-service -e dev -p nodeport -c &&
   ./src/infrastructure/argocd/bl64/control-service -e dev -p nodeport -l &&
-  ./src/infrastructure/argocd/bl64/control-application -e dev -p nodeport -d
+  ./src/infrastructure/argocd/bl64/control-application -e dev -p nodeport -c
   ```
 
   - Using FluxCD:
 
   ```shell
-  ./src/infrastructure/fluxcd/bl64/control -e dev -p github -b
+  ./src/infrastructure/fluxcd/bl64/control -e dev -p github -c
   ```
+
+- (optional) Start NGINX to proxy MetalLB. This will allow local connections from the workstation to exposed cluster services of LoadBalancer type
+
+  ```shell
+  ./src/infrastructure/nginx/bl64/control -e dev -p k8s -c
+  ```
+
+## Operation
+
+### Remove NGINX proxy
+
+Use to stop and remove the NGIX container
+
+```shell
+./src/infrastructure/nginx/bl64/control -e dev -p k8s -d
+```
+
+### Remove Kind K8S cluster
+
+Use to stop and **destroy** the cluster and deployed applications
+
+```shell
+./src/kubernetes/kind/bl64/control -e dev -p medium -d
+```
 
 ## Contributing
 
