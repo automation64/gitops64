@@ -1,9 +1,0 @@
----
-object: "gitops64.argocd"
-version: "1.0.0"
-
-argocd:
-  admin:
-    user: "admin"
-    vault: "argocd-admin-password.txt"
-...

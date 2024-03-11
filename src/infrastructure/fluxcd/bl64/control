@@ -66,11 +66,11 @@ function fluxcd_control_bootstrap() {
       --private \
       --verbose \
       --cache-dir="$DEV_PATH_TMP" \
-      --context="$FLUXCD_CLUSTER_CONTEXT" \
-      --owner="$FLUXCD_CLUSTER_OWNER" \
-      --repository="$FLUXCD_CLUSTER_REPOSITORY" \
-      --branch="$FLUXCD_CLUSTER_BRANCH" \
-      --path="$FLUXCD_CLUSTER_PATH" \
+      --context="$G64_FLUXCD_CLUSTER_CONTEXT" \
+      --owner="$G64_FLUXCD_CLUSTER_OWNER" \
+      --repository="$G64_FLUXCD_CLUSTER_REPOSITORY" \
+      --branch="$G64_FLUXCD_CLUSTER_BRANCH" \
+      --path="$G64_FLUXCD_CLUSTER_PATH" \
       --timeout="$FLUXCD_TIMEOUT"
 }
 
@@ -78,7 +78,7 @@ function fluxcd_control_bootstrap() {
 # shellcheck disable=SC2154
 function fluxcd_control_cleanup() {
   bl64_dbg_app_show_function
-  local flux_system="${FLUXCD_CLUSTER_PATH}/flux-system"
+  local flux_system="${G64_FLUXCD_CLUSTER_PATH}/flux-system"
   bl64_msg_show_task "remove FluxCD from GIT (${flux_system})"
   if [[ -d "$flux_system" ]]; then
     bl64_fs_rm_full "$flux_system"
@@ -90,7 +90,7 @@ function fluxcd_control_cleanup() {
 # shellcheck disable=SC2154
 function fluxcd_control_uninstall() {
   bl64_dbg_app_show_function
-  bl64_msg_show_task "uninstall FluxCD from cluster (${FLUXCD_CLUSTER_CONTEXT})"
+  bl64_msg_show_task "uninstall FluxCD from cluster (${G64_FLUXCD_CLUSTER_CONTEXT})"
   bl64_ui_ask_confirmation \
     'Do you want to uninstall FluxCD from the current cluster?. Confirm by typing:' 'YES' &&
     "$FLUXCD_CONTROL_FLUX_BIN" \
@@ -98,7 +98,7 @@ function fluxcd_control_uninstall() {
       --verbose \
       --silent \
       --cache-dir="$DEV_PATH_TMP" \
-      --context="$FLUXCD_CLUSTER_CONTEXT" &&
+      --context="$G64_FLUXCD_CLUSTER_CONTEXT" &&
     fluxcd_control_cleanup
 }
 
@@ -130,12 +130,12 @@ function fluxcd_control_initialize() {
     return $?
 
   gitops64_initialize "$environment" &&
-    gitops64_setup_load "$environment" 'infrastructure/fluxcd' "$profile" 'cluster' &&
-    bl64_check_export 'FLUXCD_CLUSTER_BRANCH' &&
-    bl64_check_export 'FLUXCD_CLUSTER_CONTEXT' &&
-    bl64_check_export 'FLUXCD_CLUSTER_OWNER' &&
-    bl64_check_export 'FLUXCD_CLUSTER_PATH' &&
-    bl64_check_export 'FLUXCD_CLUSTER_REPOSITORY'
+    gitops64_setup_load "$environment" 'infrastructure/fluxcd' "$profile" 'gitops64' &&
+    bl64_check_export 'G64_FLUXCD_CLUSTER_BRANCH' &&
+    bl64_check_export 'G64_FLUXCD_CLUSTER_CONTEXT' &&
+    bl64_check_export 'G64_FLUXCD_CLUSTER_OWNER' &&
+    bl64_check_export 'G64_FLUXCD_CLUSTER_PATH' &&
+    bl64_check_export 'G64_FLUXCD_CLUSTER_REPOSITORY'
 }
 
 #######################################

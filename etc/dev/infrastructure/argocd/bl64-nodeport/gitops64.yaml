@@ -1,0 +1,16 @@
+---
+g64:
+  argocd:
+    object: "g64.argocd"
+    version: "2.0.0"
+    admin:
+      user: "admin"
+      vault: "argocd-admin-password.txt"
+    cluster:
+      namespace: "argocd"
+      context: "argocd"
+    gitops:
+      repository: "X_GIT_REPO_URL_X"
+    server:
+      access: "port-forward"
+...

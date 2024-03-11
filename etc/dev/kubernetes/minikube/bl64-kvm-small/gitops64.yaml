@@ -1,0 +1,21 @@
+---
+g64:
+  minikube:
+    object: "g64.minikube"
+    version: "4.0.0"
+    cluster:
+      profile: "dev"
+      addons: "csi-hostpath-driver volumesnapshots"
+      driver:
+        name: "kvm2"
+      cni:
+        driver: "cilium"
+    k8s:
+      version: "1.27"
+      size:
+        nodes: 1
+        cpus: 4
+        memory: "16g"
+        disk_size: "10g"
+        extra_disks: 1
+...

@@ -1,8 +1,0 @@
----
-github:
-  repository:
-    owner: "X_GITHUB_REPO_OWNER_X"
-    name: "X_GITHUB_REPO_NAME_X"
-  key:
-    type: "ed25519"
-...
