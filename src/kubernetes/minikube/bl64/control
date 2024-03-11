@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 3.0.0
+# Version: 4.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -49,7 +49,7 @@ source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-ui.bash" &&
 # Globals
 #
 
-export MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN="${MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN:-/usr/bin/minikube}"
+export G64_MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN="${G64_MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN:-/usr/bin/minikube}"
 
 #
 # Functions
@@ -60,7 +60,7 @@ function minikube_control_addon_enable() {
   local addon=''
   bl64_msg_show_task 'Enable minikube addons'
   # shellcheck disable=SC2154
-  for addon in $MINIKUBE_CLUSTER_ADDONS; do
+  for addon in $G64_MINIKUBE_CLUSTER_ADDONS; do
     minikube_control_minikube_run \
       addons enable \
       "$addon" ||
@@ -73,8 +73,8 @@ function minikube_control_minikube_run() {
   bl64_dbg_app_show_function "$@"
   bl64_dbg_app_trace_start
   # shellcheck disable=SC2154
-  "$MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN" \
-    --profile="$MINIKUBE_CLUSTER_PROFILE" \
+  "$G64_MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN" \
+    --profile="$G64_MINIKUBE_CLUSTER_PROFILE" \
     "$@"
   bl64_dbg_app_trace_stop
 }
@@ -193,12 +193,12 @@ function minikube_control_certificate_deploy() {
 # shellcheck disable=SC2154
 function minikube_control_cluster_start() {
   bl64_dbg_app_show_function
-  bl64_msg_show_task "start minikube cluster (${MINIKUBE_CLUSTER_PROFILE})"
-  case "$MINIKUBE_CLUSTER_DRIVER_NAME" in
+  bl64_msg_show_task "start minikube cluster (${G64_MINIKUBE_CLUSTER_PROFILE})"
+  case "$G64_MINIKUBE_CLUSTER_DRIVER_NAME" in
   'virtualbox') minikube_control_cluster_start_virtualbox ;;
   'kvm2') minikube_control_cluster_start_kvm2 ;;
   'docker') minikube_control_cluster_start_docker ;;
-  *) bl64_check_alert_parameter_invalid "$MINIKUBE_CLUSTER_DRIVER_NAME" ;;
+  *) bl64_check_alert_parameter_invalid "$G64_MINIKUBE_CLUSTER_DRIVER_NAME" ;;
   esac &&
     minikube_control_addon_enable
 }
@@ -211,11 +211,11 @@ function minikube_control_cluster_start_docker() {
     start \
     --interactive=false \
     --install-addons=false \
-    --cni="$MINIKUBE_CLUSTER_CNI_DRIVER" \
-    --nodes="$MINIKUBE_K8S_SIZE_NODES" \
-    --disk-size="$MINIKUBE_K8S_SIZE_DISK_SIZE" \
-    --driver="$MINIKUBE_CLUSTER_DRIVER_NAME" \
-    --kubernetes-version="$MINIKUBE_K8S_VERSION"
+    --cni="$G64_MINIKUBE_CLUSTER_CNI_DRIVER" \
+    --nodes="$G64_MINIKUBE_K8S_SIZE_NODES" \
+    --disk-size="$G64_MINIKUBE_K8S_SIZE_DISK_SIZE" \
+    --driver="$G64_MINIKUBE_CLUSTER_DRIVER_NAME" \
+    --kubernetes-version="$G64_MINIKUBE_K8S_VERSION"
 }
 
 # Required to prevent false positive on YAML generated shell-env
@@ -226,13 +226,13 @@ function minikube_control_cluster_start_virtualbox() {
     start \
     --interactive=false \
     --install-addons=false \
-    --cni="$MINIKUBE_CLUSTER_CNI_DRIVER" \
-    --nodes="$MINIKUBE_K8S_SIZE_NODES" \
-    --cpus="$MINIKUBE_K8S_SIZE_CPUS" \
-    --memory="$MINIKUBE_K8S_SIZE_MEMORY" \
-    --disk-size="$MINIKUBE_K8S_SIZE_DISK_SIZE" \
-    --driver="$MINIKUBE_CLUSTER_DRIVER_NAME" \
-    --kubernetes-version="$MINIKUBE_K8S_VERSION"
+    --cni="$G64_MINIKUBE_CLUSTER_CNI_DRIVER" \
+    --nodes="$G64_MINIKUBE_K8S_SIZE_NODES" \
+    --cpus="$G64_MINIKUBE_K8S_SIZE_CPUS" \
+    --memory="$G64_MINIKUBE_K8S_SIZE_MEMORY" \
+    --disk-size="$G64_MINIKUBE_K8S_SIZE_DISK_SIZE" \
+    --driver="$G64_MINIKUBE_CLUSTER_DRIVER_NAME" \
+    --kubernetes-version="$G64_MINIKUBE_K8S_VERSION"
 }
 
 # Required to prevent false positive on YAML generated shell-env
@@ -243,14 +243,14 @@ function minikube_control_cluster_start_kvm2() {
     start \
     --interactive=false \
     --install-addons=false \
-    --cni="$MINIKUBE_CLUSTER_CNI_DRIVER" \
-    --nodes="$MINIKUBE_K8S_SIZE_NODES" \
-    --cpus="$MINIKUBE_K8S_SIZE_CPUS" \
-    --memory="$MINIKUBE_K8S_SIZE_MEMORY" \
-    --disk-size="$MINIKUBE_K8S_SIZE_DISK_SIZE" \
-    --driver="$MINIKUBE_CLUSTER_DRIVER_NAME" \
-    --kubernetes-version="$MINIKUBE_K8S_VERSION" \
-    --extra-disks="$MINIKUBE_K8S_SIZE_EXTRA_DISKS"
+    --cni="$G64_MINIKUBE_CLUSTER_CNI_DRIVER" \
+    --nodes="$G64_MINIKUBE_K8S_SIZE_NODES" \
+    --cpus="$G64_MINIKUBE_K8S_SIZE_CPUS" \
+    --memory="$G64_MINIKUBE_K8S_SIZE_MEMORY" \
+    --disk-size="$G64_MINIKUBE_K8S_SIZE_DISK_SIZE" \
+    --driver="$G64_MINIKUBE_CLUSTER_DRIVER_NAME" \
+    --kubernetes-version="$G64_MINIKUBE_K8S_VERSION" \
+    --extra-disks="$G64_MINIKUBE_K8S_SIZE_EXTRA_DISKS"
 }
 
 # Required to prevent false positive on YAML generated shell-env
@@ -306,18 +306,18 @@ function minikube_control_initialize() {
     bl64_check_parameter 'environment' ||
     { minikube_control_help && return 1; }
 
-  bl64_check_command "$MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN" &&
+  bl64_check_command "$G64_MINIKUBE_CLUSTER_CONTROL_MINIKUBE_BIN" &&
     bl64_k8s_setup ||
     return $?
 
   gitops64_initialize "$environment" &&
-    gitops64_setup_load "$environment" 'kubernetes/minikube' "$profile" 'cluster' &&
-    bl64_check_export 'MINIKUBE_K8S_SIZE_DISK_SIZE' &&
-    bl64_check_export 'MINIKUBE_K8S_SIZE_NODES' &&
-    bl64_check_export 'MINIKUBE_K8S_VERSION' &&
-    bl64_check_export 'MINIKUBE_CLUSTER_DRIVER_NAME' &&
-    bl64_check_export 'MINIKUBE_CLUSTER_CNI_DRIVER' &&
-    bl64_check_export 'MINIKUBE_CLUSTER_PROFILE'
+    gitops64_setup_load "$environment" 'kubernetes/minikube' "$profile" 'gitops64' &&
+    bl64_check_export 'G64_MINIKUBE_K8S_SIZE_DISK_SIZE' &&
+    bl64_check_export 'G64_MINIKUBE_K8S_SIZE_NODES' &&
+    bl64_check_export 'G64_MINIKUBE_K8S_VERSION' &&
+    bl64_check_export 'G64_MINIKUBE_CLUSTER_DRIVER_NAME' &&
+    bl64_check_export 'G64_MINIKUBE_CLUSTER_CNI_DRIVER' &&
+    bl64_check_export 'G64_MINIKUBE_CLUSTER_PROFILE'
 }
 
 #######################################

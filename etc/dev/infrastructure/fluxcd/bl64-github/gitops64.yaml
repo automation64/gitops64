@@ -1,0 +1,12 @@
+---
+g64:
+  fluxcd:
+    object: "g64.fluxcd"
+    version: "2.0.0"
+    cluster:
+      owner: "X_GITHUB_REPO_OWNER_X"
+      repository: "test-gitops"
+      branch: "main"
+      path: "var/dev/fluxcd"
+      context: "dev"
+...

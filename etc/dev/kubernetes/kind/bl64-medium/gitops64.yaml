@@ -1,0 +1,8 @@
+---
+g64:
+  kind:
+    object: "g64.kind"
+    version: "2.0.0"
+    cluster:
+      name: "dev"
+...

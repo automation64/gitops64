@@ -1,0 +1,23 @@
+---
+g64:
+  gitops64:
+    object: "g64.gitops64"
+    version: "3.0.0"
+
+    #
+    # Key definitions. File name only
+    #
+    key:
+      deployment:
+        private: "deployment-key"
+        public: "deployment-key.pub"
+
+    #
+    # Module ID
+    #
+    module:
+      id:
+        bashlib64: "bl64"
+        argocd: "argocd"
+        fluxcd: "fluxcd"
+...

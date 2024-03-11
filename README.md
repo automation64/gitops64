@@ -23,7 +23,7 @@ The main purpose is to provide ready-to-use deployment modules for popular Kuber
 
 ### Directory structure
 
-- `bin`: continous integration, repository, development scripts
+- `bin`: continuous integration, repository, development scripts
 - `data`: location for persistent data files
 - `docs`: application deployment documentation
 - `etc`: deployment configuration
@@ -39,7 +39,7 @@ The main purpose is to provide ready-to-use deployment modules for popular Kuber
 Applications are organized based on type:
 
 - kubernetes: optional kubernetes components and APIs (e.g.: metrics-server, etc.)
-- infrastructure: infrastructure providing services to applications (e.g.: cert-manager, sealdersecrets, etc.)
+- infrastructure: infrastructure providing services to applications (e.g.: cert-manager, sealed-secrets, etc.)
 - applications: end-user applications
 - resources: non-application objects consumed by application and infrastructure (e.g.: certificates, storage, etc/)
 
@@ -51,17 +51,20 @@ Use the following procedure to deploy GitOps64 for testing purposes on a Minikub
 
 #### Tools
 
-- Core
+- Virtualization
+  - Docker and/or KVM
+- Tools
   - GIT
-  - KubeCTL
   - Bash
   - Curl
   - YamlQuery (yq)
   - GitHub CLI
+- Kubernetes
+  - KubeCTL
   - Minikube or Kind
+  - Helm CLI
 - GitOps
   - FluxCD or ArgoCD CLI
-  - Helm CLI
 
 #### Infrastructure
 
@@ -99,9 +102,9 @@ var/fluxcd/*/flux-system
 ```
 
 - Review and update dev-environment configuration as needed: `etc/<ENVIRONMENT>`, in particular values marked with replacement tags `X_..._X`
-  - [FluxCD](etc/dev/infrastructure/argocd/bl64-nodeport/service.yaml)
-  - [ArgoCD](etc/dev/infrastructure/fluxcd/bl64-minikube/cluster.yaml)
-  - [GitHub](etc/dev/infrastructure/github/bl64-default/service.yaml)
+  - [FluxCD](etc/dev/infrastructure/argocd/bl64-nodeport/gitops64.yaml)
+  - [ArgoCD](etc/dev/infrastructure/fluxcd/bl64-minikube/gitops64.yaml)
+  - [GitHub](etc/dev/infrastructure/github/bl64-default/gitops64.yaml)
 
 - Review and update enabled modules: `var/<ENVIRONMENT>`:
   - FluxCD
@@ -117,38 +120,38 @@ var/fluxcd/*/flux-system
 - Create dev/test environment
   - Using Minikube
 
-  ```shell
-  ./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -c &&
-  ./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -s
-  ```
+```shell
+./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -c &&
+./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -s
+```
 
   - Using Kind
 
-  ```shell
-  ./src/kubernetes/kind/bl64/control -e dev -p medium -c &&
-  ./src/kubernetes/kind/bl64/control -e dev -p medium -s
-  ```
+```shell
+./src/kubernetes/kind/bl64/control -e dev -p medium -c &&
+./src/kubernetes/kind/bl64/control -e dev -p medium -s
+```
 
 - Deploy GitOps service to Kubernetes
   - Using ArgoCD:
 
-  ```shell
-  ./src/infrastructure/argocd/bl64/control-service -e dev -p nodeport -c &&
-  ./src/infrastructure/argocd/bl64/control-service -e dev -p nodeport -l &&
-  ./src/infrastructure/argocd/bl64/control-application -e dev -p nodeport -c
-  ```
+```shell
+./src/infrastructure/argocd/bl64/control-service -e dev -p nodeport -c &&
+./src/infrastructure/argocd/bl64/control-service -e dev -p nodeport -l &&
+./src/infrastructure/argocd/bl64/control-application -e dev -p nodeport -c
+```
 
   - Using FluxCD:
 
-  ```shell
-  ./src/infrastructure/fluxcd/bl64/control -e dev -p github -c
-  ```
+```shell
+./src/infrastructure/fluxcd/bl64/control -e dev -p github -c
+```
 
 - (optional) Start NGINX to proxy MetalLB. This will allow local connections from the workstation to exposed cluster services of LoadBalancer type
 
-  ```shell
-  ./src/infrastructure/nginx/bl64/control -e dev -p k8s -c
-  ```
+```shell
+./src/infrastructure/nginx/bl64/control -e dev -p k8s -c
+```
 
 ## Operation
 

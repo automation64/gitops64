@@ -50,8 +50,8 @@ source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
 # Globals
 #
 
-export KIND_CLUSTER_CONTROL_KIND_BIN="${KIND_CLUSTER_CONTROL_KIND_BIN:-/usr/local/bin/kind}"
-export KIND_CLUSTER_CONFIG=''
+export G64_KIND_CLUSTER_CONTROL_KIND_BIN="${G64_KIND_CLUSTER_CONTROL_KIND_BIN:-/usr/local/bin/kind}"
+export G64_KIND_CLUSTER_CONFIG=''
 
 #
 # Functions
@@ -61,7 +61,7 @@ function kind_control_kind_run() {
   bl64_dbg_app_show_function "$@"
   bl64_dbg_app_trace_start
   # shellcheck disable=SC2154
-  "$KIND_CLUSTER_CONTROL_KIND_BIN" \
+  "$G64_KIND_CLUSTER_CONTROL_KIND_BIN" \
     --verbosity=2 \
     "$@"
   bl64_dbg_app_trace_stop
@@ -72,8 +72,8 @@ function kind_control_cluster_start() {
   bl64_msg_show_task "start kind cluster"
   kind_control_kind_run \
     create cluster \
-    --config "$KIND_CLUSTER_CONFIG" \
-    --name "$KIND_CLUSTER_NAME"
+    --config "$G64_KIND_CLUSTER_CONFIG" \
+    --name "$G64_KIND_CLUSTER_NAME"
 }
 
 function kind_control_cluster_delete() {
@@ -84,7 +84,7 @@ function kind_control_cluster_delete() {
     'YES' &&
     kind_control_kind_run \
       delete cluster \
-      --name "$KIND_CLUSTER_NAME"
+      --name "$G64_KIND_CLUSTER_NAME"
 
   if bl64_cnt_network_is_defined "$network_kind"; then
     bl64_cnt_cli \
@@ -138,18 +138,18 @@ function kind_control_initialize() {
     bl64_check_parameter 'environment' ||
     { kind_control_help && return 1; }
 
-  bl64_check_command "$KIND_CLUSTER_CONTROL_KIND_BIN" &&
+  bl64_check_command "$G64_KIND_CLUSTER_CONTROL_KIND_BIN" &&
     bl64_cnt_setup &&
     bl64_k8s_setup ||
     return $?
 
   gitops64_initialize "$environment" &&
-    gitops64_setup_load "$environment" 'kubernetes/kind' "$profile" 'cluster' &&
-    bl64_check_export 'KIND_CLUSTER_NAME' ||
+    gitops64_setup_load "$environment" 'kubernetes/kind' "$profile" 'gitops64' &&
+    bl64_check_export 'G64_KIND_CLUSTER_NAME' ||
     return $?
 
-  KIND_CLUSTER_CONFIG="${DEV_PATH_ETC}/${environment}/kubernetes/kind/kind-${profile}/config.yaml"
-  bl64_check_file "$KIND_CLUSTER_CONFIG"
+  G64_KIND_CLUSTER_CONFIG="${DEV_PATH_ETC}/${environment}/kubernetes/kind/kind-${profile}/config.yaml"
+  bl64_check_file "$G64_KIND_CLUSTER_CONFIG"
 }
 
 #######################################

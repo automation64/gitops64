@@ -1,0 +1,9 @@
+---
+apiVersion: "kustomize.config.k8s.io/v1beta1"
+kind: "Kustomization"
+
+resources:
+  - "../../../../../src/X_TYPE_X/X_APP_X/kustomize/argocd"
+patches:
+  - path: "application.patch.yaml"
+...

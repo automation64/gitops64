@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 3.0.0
+# Version: 4.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -59,7 +59,7 @@ export GITHUB_CONTROL_KEYGEN_BIN="${GITHUB_CONTROL_KEYGEN_BIN:-/usr/bin/ssh-keyg
 function github_control_key_show() {
   bl64_dbg_app_show_function "$@"
   local environment="$1"
-  local repository="${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}"
+  local repository="${G64_GITHUB_REPOSITORY_OWNER}/${G64_GITHUB_REPOSITORY_NAME}"
   bl64_msg_show_task "show GitHub repository deployment keys (${repository})"
   "$GITHUB_CONTROL_GH_BIN" repo deploy-key \
     --repo "$repository" \
@@ -71,9 +71,9 @@ function github_control_key_show() {
 function github_control_key_add() {
   bl64_dbg_app_show_function "$@"
   local environment="$1"
-  local repository="${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}"
+  local repository="${G64_GITHUB_REPOSITORY_OWNER}/${G64_GITHUB_REPOSITORY_NAME}"
   local key_title='GitOps64 Deployment SSH Key'
-  local key_private="${DEV_PATH_VAULT}/${environment}/${GITOPS64_KEY_DEPLOYMENT_PRIVATE}"
+  local key_private="${DEV_PATH_VAULT}/${environment}/${G64_GITOPS64_KEY_DEPLOYMENT_PRIVATE}"
 
   bl64_msg_show_task "generate deployment SSH key (${key_private})"
   if [[ -f "$key_private" ]]; then
@@ -81,7 +81,7 @@ function github_control_key_add() {
   else
     "$GITHUB_CONTROL_KEYGEN_BIN" \
       -N '' \
-      -t "$GITHUB_KEY_TYPE" \
+      -t "$G64_GITHUB_API_SSH_TYPE" \
       -C "$key_title" \
       -f "$key_private" ||
       return $?
@@ -100,7 +100,7 @@ function github_control_key_add() {
 function github_control_key_remove() {
   bl64_dbg_app_show_function "$@"
   local environment="$1"
-  local repository="${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}"
+  local repository="${G64_GITHUB_REPOSITORY_OWNER}/${G64_GITHUB_REPOSITORY_NAME}"
   local key_id="$2"
   bl64_msg_show_task "remove GitHub repository deployment key (${repository}:${key_id})"
   "$GITHUB_CONTROL_GH_BIN" repo deploy-key \
@@ -147,10 +147,11 @@ function github_control_initialize() {
     return $?
 
   gitops64_initialize "$environment" &&
-    gitops64_setup_load "$environment" 'infrastructure/github' "$profile" 'service' &&
-    bl64_check_export 'GITHUB_REPOSITORY_NAME' &&
-    bl64_check_export 'GITHUB_REPOSITORY_OWNER' &&
-    bl64_check_export 'GITHUB_KEY_TYPE' ||
+    gitops64_setup_load "$environment" 'infrastructure/github' "$profile" 'gitops64' &&
+    bl64_check_export 'G64_GITHUB_REPOSITORY_NAME' &&
+    bl64_check_export 'G64_GITHUB_REPOSITORY_OWNER' &&
+    bl64_check_export 'G64_GITOPS64_KEY_DEPLOYMENT_PRIVATE' &&
+    bl64_check_export 'G64_GITHUB_API_SSH_TYPE' ||
     return $?
 
   if [[ "$command" == 'key_remove' ]]; then

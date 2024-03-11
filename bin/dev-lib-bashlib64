@@ -2,7 +2,7 @@
 #######################################
 # Dev / Lib / Bashlib64 / Download
 #
-# * Version: 4.1.0
+# * Version: 4.2.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -46,4 +46,7 @@ export INST64_BASHLIB64_TARGET="$DEV_LIB_BASHLIB64_TARGET"
 [[ ! -d "$DEV_LIB_INSTALLER64_TARGET" ]] && dev_set_error 'Installer64 not found, please run ./bin/dev-lib-installer64 and try again' && exit 1
 
 [[ -d "$DEV_LIB_BASHLIB64_TARGET" ]] && rm -Rf "$DEV_LIB_BASHLIB64_TARGET"
-"${DEV_LIB_INSTALLER64_TARGET}/install-bashlib64"
+"${DEV_LIB_INSTALLER64_TARGET}/install-bashlib64" &&
+rm -f \
+    "${DEV_LIB_BASHLIB64_TARGET}/bashlib64.bash" \
+    "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-opt.bash"

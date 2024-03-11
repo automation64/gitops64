@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 3.0.0
+# Version: 4.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -28,7 +28,7 @@
 function gitops64_initialize() {
   bl64_dbg_app_show_function "$@"
   local environment="$1"
-  local configuration='etc/all/gitops64/setup.yaml'
+  local configuration='etc/all/gitops64/gitops64.yaml'
 
   bl64_msg_show_task 'initialize GitOps64 environment'
   bl64_check_file "$configuration" &&
@@ -48,10 +48,11 @@ function gitops64_setup_load() {
 
   bl64_check_parameter 'environment' &&
     bl64_check_parameter 'module' &&
-    bl64_check_parameter 'setup_name' ||
+    bl64_check_parameter 'setup_name' &&
+    bl64_check_export 'G64_GITOPS64_MODULE_ID_BASHLIB64' ||
     return $?
 
   [[ "$profile" == "$BL64_VAR_DEFAULT" ]] && profile='default'
 
-  bl64_bsh_env_import_yaml "${DEV_PATH_ETC}/${environment}/${module}/${GITOPS64_MODULE_ID_BASHLIB64}-${profile}/${setup_name}.yaml"
+  bl64_bsh_env_import_yaml "${DEV_PATH_ETC}/${environment}/${module}/${G64_GITOPS64_MODULE_ID_BASHLIB64}-${profile}/${setup_name}.yaml"
 }

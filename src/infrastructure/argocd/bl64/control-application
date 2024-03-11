@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 4.0.0
+# Version: 4.1.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -62,7 +62,7 @@ export ARGOCD_CONTROL_KUBECONFIG_PATH="${ARGOCD_CONTROL_KUBECONFIG_PATH:-${HOME}
 function argocd_control_run_cli() {
   bl64_dbg_app_show_function "$@"
   local access=''
-  [[ "$ARGOCD_SERVER_ACCESS" == 'port-forward' ]] && access="--port-forward --port-forward-namespace ${ARGOCD_CLUSTER_NAMESPACE}"
+  [[ "$G64_ARGOCD_SERVER_ACCESS" == 'port-forward' ]] && access="--port-forward --port-forward-namespace ${G64_ARGOCD_CLUSTER_NAMESPACE}"
   # shellcheck disable=SC2086
   "$ARGOCD_CONTROL_ARGOCD_BIN" \
     $access \
@@ -161,9 +161,9 @@ function argocd_control_initialize() {
     return $?
 
   gitops64_initialize "$environment" &&
-    gitops64_setup_load 'all' 'argocd' "$profile" 'setup' &&
-    gitops64_setup_load "$environment" 'infrastructure/argocd' "$profile" 'service' &&
-    bl64_check_export 'ARGOCD_CLUSTER_NAMESPACE' ||
+    gitops64_setup_load "$environment" 'infrastructure/argocd' "$profile" 'gitops64' &&
+    bl64_check_export 'G64_ARGOCD_CLUSTER_NAMESPACE' &&
+    bl64_check_export 'G64_ARGOCD_SERVER_ACCESS' ||
     return $?
 
   if [[ "$command" == 'sync' || "$command" == 'status' ]]; then

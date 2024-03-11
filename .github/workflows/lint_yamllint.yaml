@@ -1,6 +1,13 @@
 ---
-# Template: 1.2.0
-name: "Lint / YAML"
+# Template: 1.3.0
+name: "Lint / YAMLLint"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  DEV_CICD_DEBUG: ""
 
 on:
   pull_request:

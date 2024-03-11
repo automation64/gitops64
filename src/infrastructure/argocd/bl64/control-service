@@ -7,7 +7,7 @@
 #
 # Author: SerDigital64 (https://github.com/serdigital64)
 # Repository: https://github.com/automation64/gitops64
-# Version: 4.0.0
+# Version: 5.0.0
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -69,7 +69,7 @@ declare ARGOCD_CONTROL_VAULT_ADMIN=''
 function argocd_control_run_cli() {
   bl64_dbg_app_show_function "$@"
   local access=''
-  [[ "$ARGOCD_SERVER_ACCESS" == 'port-forward' ]] && access="--port-forward --port-forward-namespace ${ARGOCD_CLUSTER_NAMESPACE}"
+  [[ "$G64_ARGOCD_SERVER_ACCESS" == 'port-forward' ]] && access="--port-forward --port-forward-namespace ${G64_ARGOCD_CLUSTER_NAMESPACE}"
   # shellcheck disable=SC2086
   "$ARGOCD_CONTROL_ARGOCD_BIN" \
     $access \
@@ -86,7 +86,7 @@ function argocd_control_secret_ssh_add() {
   argocd_control_run_cli \
     repo add \
     --ssh-private-key-path "$ARGOCD_CONTROL_KEY_PRIVATE" \
-    "$ARGOCD_GITOPS_REPOSITORY"
+    "$G64_ARGOCD_GITOPS_REPOSITORY"
 }
 
 # Required to prevent false positive on YAML generated shell-env
@@ -101,7 +101,7 @@ function argocd_control_remove() {
     bl64_hlm_run_helm \
       uninstall \
       --wait \
-      --namespace "$ARGOCD_CLUSTER_NAMESPACE" \
+      --namespace "$G64_ARGOCD_CLUSTER_NAMESPACE" \
       "$ARGOCD_CONTROL_CHART_NAME" ||
     return $?
   if [[ -f "$ARGOCD_CONTROL_VAULT_ADMIN" ]]; then
@@ -121,7 +121,7 @@ function argocd_control_login() {
   password="$(<$ARGOCD_CONTROL_VAULT_ADMIN)" &&
     argocd_control_run_cli \
       login \
-      --username "$ARGOCD_ADMIN_USER" \
+      --username "$G64_ARGOCD_ADMIN_USER" \
       --password "$password"
 }
 
@@ -132,7 +132,7 @@ function argocd_control_deploy() {
   local environment="$1"
   local profile="$2"
   local chart_source='argo/argo-cd'
-  local chart_values="${DEV_PATH_ETC}/${environment}/infrastructure/argocd/${GITOPS64_MODULE_ID_BASHLIB64}-${profile}/chart-values.yaml"
+  local chart_values="${DEV_PATH_ETC}/${environment}/infrastructure/argocd/${G64_GITOPS64_MODULE_ID_BASHLIB64}-${profile}/helm-chart-values.yaml"
   local admin_secret='argocd-initial-admin-secret'
 
   bl64_check_file "$chart_values" ||
@@ -144,7 +144,7 @@ function argocd_control_deploy() {
   bl64_msg_show_task "deploy ArgoCD to Kubernetes Cluster (${environment})"
   bl64_hlm_chart_upgrade \
     "$ARGOCD_CONTROL_KUBECONFIG_PATH" \
-    "$ARGOCD_CLUSTER_NAMESPACE" \
+    "$G64_ARGOCD_CLUSTER_NAMESPACE" \
     "$ARGOCD_CONTROL_CHART_NAME" \
     "$chart_source" \
     --values "$chart_values" ||
@@ -159,7 +159,7 @@ function argocd_control_deploy() {
       bl64_k8s_run_kubectl \
         "$BL64_VAR_DEFAULT" \
         get secret \
-        --namespace "$ARGOCD_CLUSTER_NAMESPACE" \
+        --namespace "$G64_ARGOCD_CLUSTER_NAMESPACE" \
         --output jsonpath="{.data.password}" \
         "$admin_secret" |
         bl64_txt_run_base64 --decode &&
@@ -199,15 +199,18 @@ function argocd_control_initialize() {
     return $?
 
   gitops64_initialize "$environment" &&
-    gitops64_setup_load 'all' 'argocd' "$profile" 'setup' &&
-    gitops64_setup_load "$environment" 'infrastructure/argocd' "$profile" 'service' &&
-    bl64_check_export 'ARGOCD_CLUSTER_CONTEXT' &&
-    bl64_check_export 'ARGOCD_CLUSTER_NAMESPACE' &&
-    bl64_check_export 'ARGOCD_GITOPS_REPOSITORY' ||
+    gitops64_setup_load "$environment" 'infrastructure/argocd' "$profile" 'gitops64' &&
+    bl64_check_export 'G64_ARGOCD_SERVER_ACCESS' &&
+    bl64_check_export 'G64_ARGOCD_CLUSTER_CONTEXT' &&
+    bl64_check_export 'G64_ARGOCD_CLUSTER_NAMESPACE' &&
+    bl64_check_export 'G64_GITOPS64_KEY_DEPLOYMENT_PRIVATE' &&
+    bl64_check_export 'G64_ARGOCD_ADMIN_USER' &&
+    bl64_check_export 'G64_ARGOCD_ADMIN_VAULT' &&
+    bl64_check_export 'G64_ARGOCD_GITOPS_REPOSITORY' ||
     return $?
 
-  ARGOCD_CONTROL_KEY_PRIVATE="${DEV_PATH_VAULT}/${environment}/${GITOPS64_KEY_DEPLOYMENT_PRIVATE}"
-  ARGOCD_CONTROL_VAULT_ADMIN="${DEV_PATH_VAULT}/${environment}/${ARGOCD_ADMIN_VAULT}"
+  ARGOCD_CONTROL_KEY_PRIVATE="${DEV_PATH_VAULT}/${environment}/${G64_GITOPS64_KEY_DEPLOYMENT_PRIVATE}"
+  ARGOCD_CONTROL_VAULT_ADMIN="${DEV_PATH_VAULT}/${environment}/${G64_ARGOCD_ADMIN_VAULT}"
 
   if [[ "$command" == 'secret_ssh_add' ]]; then
     bl64_check_file "$ARGOCD_CONTROL_KEY_PRIVATE" 'missing deploy key file. Please generate one and retry'
