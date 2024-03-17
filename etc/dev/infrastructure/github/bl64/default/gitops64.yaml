@@ -1,0 +1,12 @@
+---
+g64:
+  github:
+    object: "g64.github"
+    version: "2.0.0"
+    repository:
+      owner: "itc64-dev"
+      name: "test-gitops"
+    api:
+      ssh:
+        type: "ed25519"
+...

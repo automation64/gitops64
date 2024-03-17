@@ -1,0 +1,216 @@
+#!/usr/bin/env bash
+# Template: 1.1.0
+#######################################
+# Kind / Control
+#
+# Control script for Minikube cluster
+#
+# Author: SerDigital64 (https://github.com/serdigital64)
+# Repository: https://github.com/automation64/gitops64
+# Version: 3.0.0
+#
+#######################################
+# Copyright [2023] [serdigital64@gmail.com]
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#######################################
+
+#
+# Imports
+#
+
+# shellcheck source=bin/dev-set
+source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
+
+# shellcheck source=src/infrastructure/gitops64/bl64/shared/setup
+source "${DEV_PATH_SRC}/infrastructure/gitops64/bl64/shared/setup" || { echo "Error: unable to load gitops64 bash lib" && exit 1; }
+
+# shellcheck source-path=lib/bl64
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fmt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-bsh.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-xsv.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-ui.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-k8s.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-cnt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
+
+#
+# Globals
+#
+
+export KIND_MAIN_KIND_BIN="${KIND_MAIN_KIND_BIN:-${DEV_LIB_KIND_BIN}}"
+export KIND_MAIN_CLUSTER_CONFIG=''
+
+#
+# Functions
+#
+
+function kind_main_kind_run() {
+  bl64_dbg_app_show_function "$@"
+  bl64_dbg_app_trace_start
+  # shellcheck disable=SC2154
+  "$KIND_MAIN_KIND_BIN" \
+    --verbosity=2 \
+    "$@"
+  bl64_dbg_app_trace_stop
+}
+
+function kind_main_cluster_start() {
+  bl64_dbg_app_show_function
+  bl64_msg_show_task "start kind cluster"
+  kind_main_kind_run \
+    create cluster \
+    --config "$KIND_MAIN_CLUSTER_CONFIG" \
+    --name "$G64_KIND_CLUSTER_NAME"
+}
+
+function kind_main_cluster_delete() {
+  bl64_dbg_app_show_function
+  local network_kind='kind'
+  bl64_ui_ask_confirmation \
+    'Do you want to completely destroy the cluster?. Confirm by typing:' \
+    'YES' &&
+    kind_main_kind_run \
+      delete cluster \
+      --name "$G64_KIND_CLUSTER_NAME"
+
+  if bl64_cnt_network_is_defined "$network_kind"; then
+    bl64_cnt_cli \
+      network \
+      rm \
+      "$network_kind"
+  fi
+  return 0
+}
+
+function kind_main_cluster_show() {
+  bl64_dbg_app_show_function
+  bl64_msg_show_info 'cluster configuration'
+  bl64_k8s_run_kubectl \
+    "$BL64_VAR_DEFAULT" \
+    cluster-info ||
+    return $?
+
+  bl64_msg_show_info 'kubernetes nodes IP range'
+  printf '\nIPAM.Config: %s\n' \
+    "$(
+      bl64_cnt_cli \
+        network \
+        inspect \
+        -f '{{.IPAM.Config}}' \
+        kind
+    )"
+}
+
+#######################################
+# Initialize environment
+#
+# Arguments:
+#   None
+# Outputs:
+#   Initializacion progress messages
+# Returns:
+#   0: initialization ok
+#   >: failed to initialize
+#######################################
+function kind_main_initialize() {
+  bl64_dbg_app_show_function "@"
+  # shellcheck disable=SC2034
+  local command="$1"
+  local environment="$2"
+  local profile="$3"
+
+  # shellcheck disable=SC2015
+  bl64_check_parameter 'command' &&
+    bl64_check_parameter 'profile' &&
+    bl64_check_parameter 'environment' ||
+    { kind_main_help && return 1; }
+
+  bl64_check_command "$KIND_MAIN_KIND_BIN" &&
+    bl64_cnt_setup &&
+    bl64_k8s_setup ||
+    return $?
+
+  gitops64_initialize "$environment" &&
+    gitops64_setup_load "$environment" 'kubernetes/kind' "$profile" 'gitops64' &&
+    bl64_check_export 'G64_KIND_CLUSTER_NAME' ||
+    return $?
+
+  KIND_MAIN_CLUSTER_CONFIG="${DEV_PATH_ETC}/${environment}/kubernetes/kind/kind/${profile}/config.yaml"
+  bl64_check_file "$KIND_MAIN_CLUSTER_CONFIG"
+}
+
+#######################################
+# Show script usage description
+#
+# Arguments:
+#   None
+# Outputs:
+#   Command line format and description
+# Returns:
+#   0
+#######################################
+function kind_main_help() {
+  bl64_msg_show_usage \
+    '<-c|-s|-d> -e Environment -p Profile [-V Verbose] [-D Debug] [-h]' \
+    'Minikube cluster control wrapper' \
+    '
+    -c            : Start cluster
+    -s            : Show cluster details
+    -d            : Delete (destroy) cluster
+    ' '
+    -h            : Show help
+    ' '
+    -e Environment: Environment name
+    -p Profile    : Configuration profile
+    -V Verbose    : Set verbosity level. Format: one of BL64_MSG_VERBOSE_*
+    -D Debug      : Enable debugging mode. Format: one of BL64_DBG_TARGET_*
+    '
+}
+
+#
+# Main
+#
+
+declare kind_main_debug="$BL64_DBG_TARGET_NONE"
+declare kind_main_verbose="$BL64_MSG_VERBOSE_APP"
+declare kind_main_command="$BL64_VAR_NULL"
+declare kind_main_option=''
+declare kind_main_environment="$BL64_VAR_NULL"
+declare kind_main_profile="$BL64_VAR_DEFAULT"
+
+(($# == 0)) && kind_main_help && exit 1
+while getopts ':csde:p:V:D:h' kind_main_option; do
+  case "$kind_main_option" in
+  c) kind_main_command='cluster_start' ;;
+  s) kind_main_command='cluster_show' ;;
+  d) kind_main_command='cluster_delete' ;;
+  e) kind_main_environment="$OPTARG" ;;
+  p) kind_main_profile="$OPTARG" ;;
+  V) kind_main_verbose="$OPTARG" ;;
+  D) kind_main_debug="$OPTARG" ;;
+  h) kind_main_help && exit 0 ;;
+  *) kind_main_help && exit 1 ;;
+  esac
+done
+bl64_dbg_set_level "$kind_main_debug" && bl64_msg_set_level "$kind_main_verbose" || exit $?
+kind_main_initialize "$kind_main_command" "$kind_main_environment" "$kind_main_profile" || exit $?
+
+bl64_msg_show_batch_start "$kind_main_command"
+case "$kind_main_command" in
+'cluster_start' | 'cluster_show' | 'cluster_stop' | 'cluster_delete') "kind_main_${kind_main_command}" ;;
+*) bl64_check_alert_parameter_invalid "$kind_main_command" ;;
+esac
+bl64_msg_show_batch_finish $? "$kind_main_command"

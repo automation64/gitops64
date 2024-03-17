@@ -1,0 +1,22 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "opensearch"
+  namespace: "argocd"
+  finalizers:
+    - "resources-finalizer.argocd.argoproj.io"
+spec:
+  project: "opensearch"
+  source:
+    chart: "opensearch"
+    repoURL: "https://opensearch-project.github.io/helm-charts/"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "opensearch"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+...

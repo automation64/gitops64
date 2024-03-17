@@ -1,0 +1,389 @@
+#!/usr/bin/env bash
+# Template: 1.1.0
+#######################################
+# Minikube / Control
+#
+# Control script for Minikube cluster
+#
+# Author: SerDigital64 (https://github.com/serdigital64)
+# Repository: https://github.com/automation64/gitops64
+# Version: 4.0.0
+#
+#######################################
+# Copyright [2023] [serdigital64@gmail.com]
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#######################################
+
+#
+# Imports
+#
+
+# shellcheck source=bin/dev-set
+source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
+
+# shellcheck source=src/infrastructure/gitops64/bl64/shared/setup
+source "${DEV_PATH_SRC}/infrastructure/gitops64/bl64/shared/setup" || { echo "Error: unable to load gitops64 bash lib" && exit 1; }
+
+# shellcheck source-path=lib/bl64source
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-bsh.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-xsv.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fmt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-ui.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-k8s.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
+
+#
+# Globals
+#
+
+export MINIKUBE_MAIN_MINIKUBE_BIN="${MINIKUBE_MAIN_MINIKUBE_BIN:-/usr/bin/minikube}"
+
+#
+# Functions
+#
+
+function minikube_main_addon_enable() {
+  bl64_dbg_app_show_function
+  local addon=''
+  bl64_msg_show_task 'Enable minikube addons'
+  # shellcheck disable=SC2154
+  for addon in $G64_MINIKUBE_CLUSTER_ADDONS; do
+    minikube_main_minikube_run \
+      addons enable \
+      "$addon" ||
+      return $?
+  done
+  return 0
+}
+
+function minikube_main_minikube_run() {
+  bl64_dbg_app_show_function "$@"
+  bl64_dbg_app_trace_start
+  # shellcheck disable=SC2154
+  "$MINIKUBE_MAIN_MINIKUBE_BIN" \
+    --profile="$G64_MINIKUBE_CLUSTER_PROFILE" \
+    "$@"
+  bl64_dbg_app_trace_stop
+}
+
+function minikube_main_node_get_config() {
+  bl64_dbg_app_show_function
+  bl64_k8s_run_kubectl "$BL64_VAR_DEFAULT" \
+    get configmap/kubelet-config -n kube-system -o jsonpath='{.data.kubelet}' |
+    bl64_xsv_run_yq \
+      --no-colors --output-format=yaml --exit-status \
+      '. + {"serverTLSBootstrap": true}'
+}
+
+function minikube_main_node_get_names() {
+  bl64_dbg_app_show_function
+  bl64_k8s_run_kubectl "$BL64_VAR_DEFAULT" \
+    get nodes -o jsonpath="{.items[*].metadata.name}{'\n'}"
+}
+
+function minikube_main_node_get_kubelet() {
+  bl64_dbg_app_show_function
+  minikube_main_minikube_run \
+    ssh \
+    --node dev \
+    "cat /var/lib/kubelet/config.yaml" |
+    bl64_xsv_run_yq \
+      --no-colors --output-format=yaml --exit-status \
+      '. + {"serverTLSBootstrap": true}'
+}
+
+function minikube_main_node_restart() {
+  bl64_dbg_app_show_function "$@"
+  local node="$1"
+  minikube_main_minikube_run \
+    ssh \
+    --node="$node" \
+    "sudo systemctl daemon-reload; sudo systemctl restart kubelet"
+}
+
+function minikube_main_certificate_approve() {
+  bl64_dbg_app_show_function
+  local certificate=''
+  local certificate_list=''
+  local wait=5
+
+  bl64_msg_show_task 'wait for new certificate requests'
+  bl64_os_run_sleep "$wait"
+  while [[ -z "$certificate_list" ]]; do
+    certificate_list="$(
+      bl64_k8s_run_kubectl "$BL64_VAR_DEFAULT" \
+        get csr -o jsonpath="{.items[*].metadata.name}{'\n'}"
+    )" ||
+      return $?
+  done
+
+  bl64_msg_show_task 'approve node certificates'
+  for certificate in $certificate_list; do
+    bl64_k8s_run_kubectl "$BL64_VAR_DEFAULT" \
+      certificate approve "$certificate" ||
+      return $?
+  done
+}
+
+function minikube_main_certificate_deploy() {
+  bl64_dbg_app_show_function
+  local data_kubelet=''
+  local node_list=''
+  local node=''
+  local node_kubelet=''
+  local wait=5
+  local -i status=0
+
+  bl64_msg_show_task 'obtain cluster data'
+  data_kubelet="$(minikube_main_node_get_config)" &&
+    node_list="$(minikube_main_node_get_names)" ||
+    return $?
+
+  bl64_msg_show_task 'insert TLS configuration to configmap'
+  bl64_k8s_run_kubectl \
+    "$BL64_VAR_DEFAULT" \
+    create configmap kubelet-config \
+    --dry-run=client --output=yaml --from-literal=kubelet="$data_kubelet" |
+    bl64_k8s_run_kubectl "$BL64_VAR_DEFAULT" \
+      apply -f - ||
+    return $?
+
+  node_kubelet="$(bl64_fs_create_tmpfile)"
+  bl64_os_run_sleep "$wait"
+  for node in $node_list; do
+    bl64_msg_show_task "update node kubelet (${node})"
+
+    bl64_msg_show_subtask 'obtain node kubelet config'
+    minikube_main_node_get_kubelet >"$node_kubelet"
+    status=$?
+    ((status != 0)) && break
+
+    bl64_msg_show_subtask 'patch node kubelet config'
+    minikube_main_minikube_run \
+      cp "$node_kubelet" "${node}:/var/lib/kubelet/config.yaml"
+    status=$?
+    ((status != 0)) && break
+
+    bl64_msg_show_subtask 'restart node kubelet'
+    minikube_main_node_restart "$node"
+    status=$?
+    ((status != 0)) && break
+    bl64_os_run_sleep "$wait"
+
+  done
+  bl64_fs_rm_tmpfile "$node_kubelet"
+  ((status != 0)) && return 1
+  minikube_main_certificate_approve
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function minikube_main_cluster_start() {
+  bl64_dbg_app_show_function
+  bl64_msg_show_task "start minikube cluster (${G64_MINIKUBE_CLUSTER_PROFILE})"
+  case "$G64_MINIKUBE_CLUSTER_DRIVER_NAME" in
+  'virtualbox') minikube_main_cluster_start_virtualbox ;;
+  'kvm2') minikube_main_cluster_start_kvm2 ;;
+  'docker') minikube_main_cluster_start_docker ;;
+  *) bl64_check_alert_parameter_invalid "$G64_MINIKUBE_CLUSTER_DRIVER_NAME" ;;
+  esac &&
+    minikube_main_addon_enable
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function minikube_main_cluster_start_docker() {
+  bl64_dbg_app_show_function
+  minikube_main_minikube_run \
+    start \
+    --interactive=false \
+    --install-addons=false \
+    --cni="$G64_MINIKUBE_CLUSTER_CNI_DRIVER" \
+    --nodes="$G64_MINIKUBE_K8S_SIZE_NODES" \
+    --disk-size="$G64_MINIKUBE_K8S_SIZE_DISK_SIZE" \
+    --driver="$G64_MINIKUBE_CLUSTER_DRIVER_NAME" \
+    --kubernetes-version="$G64_MINIKUBE_K8S_VERSION"
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function minikube_main_cluster_start_virtualbox() {
+  bl64_dbg_app_show_function
+  minikube_main_minikube_run \
+    start \
+    --interactive=false \
+    --install-addons=false \
+    --cni="$G64_MINIKUBE_CLUSTER_CNI_DRIVER" \
+    --nodes="$G64_MINIKUBE_K8S_SIZE_NODES" \
+    --cpus="$G64_MINIKUBE_K8S_SIZE_CPUS" \
+    --memory="$G64_MINIKUBE_K8S_SIZE_MEMORY" \
+    --disk-size="$G64_MINIKUBE_K8S_SIZE_DISK_SIZE" \
+    --driver="$G64_MINIKUBE_CLUSTER_DRIVER_NAME" \
+    --kubernetes-version="$G64_MINIKUBE_K8S_VERSION"
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function minikube_main_cluster_start_kvm2() {
+  bl64_dbg_app_show_function
+  minikube_main_minikube_run \
+    start \
+    --interactive=false \
+    --install-addons=false \
+    --cni="$G64_MINIKUBE_CLUSTER_CNI_DRIVER" \
+    --nodes="$G64_MINIKUBE_K8S_SIZE_NODES" \
+    --cpus="$G64_MINIKUBE_K8S_SIZE_CPUS" \
+    --memory="$G64_MINIKUBE_K8S_SIZE_MEMORY" \
+    --disk-size="$G64_MINIKUBE_K8S_SIZE_DISK_SIZE" \
+    --driver="$G64_MINIKUBE_CLUSTER_DRIVER_NAME" \
+    --kubernetes-version="$G64_MINIKUBE_K8S_VERSION" \
+    --extra-disks="$G64_MINIKUBE_K8S_SIZE_EXTRA_DISKS"
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function minikube_main_cluster_show() {
+  bl64_dbg_app_show_function
+  minikube_main_minikube_run \
+    status
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function minikube_main_cluster_stop() {
+  bl64_dbg_app_show_function
+  bl64_ui_ask_confirmation \
+    'Is it safe to shutdown the cluster?. Confirm by typing:' \
+    'YES' &&
+    minikube_main_minikube_run \
+      stop
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function minikube_main_cluster_delete() {
+  bl64_dbg_app_show_function
+  bl64_ui_ask_confirmation \
+    'Do you want to completely destroy the cluster?. Confirm by typing:' \
+    'YES' &&
+    minikube_main_minikube_run \
+      delete
+}
+
+#######################################
+# Initialize environment
+#
+# Arguments:
+#   None
+# Outputs:
+#   Initializacion progress messages
+# Returns:
+#   0: initialization ok
+#   >: failed to initialize
+#######################################
+function minikube_main_initialize() {
+  bl64_dbg_app_show_function "@"
+  # shellcheck disable=SC2034
+  local command="$1"
+  local environment="$2"
+  local profile="$3"
+
+  # shellcheck disable=SC2015
+  bl64_check_parameter 'command' &&
+    bl64_check_parameter 'environment' ||
+    { minikube_main_help && return 1; }
+
+  bl64_check_command "$MINIKUBE_MAIN_MINIKUBE_BIN" &&
+    bl64_k8s_setup ||
+    return $?
+
+  gitops64_initialize "$environment" &&
+    gitops64_setup_load "$environment" 'kubernetes/minikube' "$profile" 'gitops64' &&
+    bl64_check_export 'G64_MINIKUBE_K8S_SIZE_DISK_SIZE' &&
+    bl64_check_export 'G64_MINIKUBE_K8S_SIZE_NODES' &&
+    bl64_check_export 'G64_MINIKUBE_K8S_VERSION' &&
+    bl64_check_export 'G64_MINIKUBE_CLUSTER_DRIVER_NAME' &&
+    bl64_check_export 'G64_MINIKUBE_CLUSTER_CNI_DRIVER' &&
+    bl64_check_export 'G64_MINIKUBE_CLUSTER_PROFILE'
+}
+
+#######################################
+# Show script usage description
+#
+# Arguments:
+#   None
+# Outputs:
+#   Command line format and description
+# Returns:
+#   0
+#######################################
+function minikube_main_help() {
+  bl64_msg_show_usage \
+    '<-c|-s|-u|-d|-t> -e Environment -p Profile [-V Verbose] [-D Debug] [-h]' \
+    'Minikube cluster control wrapper' \
+    '
+    -c            : Start cluster
+    -s            : Show cluster details
+    -u            : Stop cluster
+    -d            : Delete (destroy) cluster
+    -t            : Deploy Node Certificate
+    ' '
+    -h            : Show help
+    ' '
+    -e Environment: Environment name
+    -p Profile    : Configuration profile
+    -V Verbose    : Set verbosity level. Format: one of BL64_MSG_VERBOSE_*
+    -D Debug      : Enable debugging mode. Format: one of BL64_DBG_TARGET_*
+    '
+}
+
+#
+# Main
+#
+
+declare minikube_main_debug="$BL64_DBG_TARGET_NONE"
+declare minikube_main_verbose="$BL64_MSG_VERBOSE_APP"
+declare minikube_main_command="$BL64_VAR_NULL"
+declare minikube_main_option=''
+declare minikube_main_environment="$BL64_VAR_NULL"
+declare minikube_main_profile="$BL64_VAR_DEFAULT"
+
+(($# == 0)) && minikube_main_help && exit 1
+while getopts ':csudte:p:V:D:h' minikube_main_option; do
+  case "$minikube_main_option" in
+  c) minikube_main_command='cluster_start' ;;
+  s) minikube_main_command='cluster_show' ;;
+  u) minikube_main_command='cluster_stop' ;;
+  d) minikube_main_command='cluster_delete' ;;
+  t) minikube_main_command='certificate_deploy' ;;
+  e) minikube_main_environment="$OPTARG" ;;
+  p) minikube_main_profile="$OPTARG" ;;
+  V) minikube_main_verbose="$OPTARG" ;;
+  D) minikube_main_debug="$OPTARG" ;;
+  h) minikube_main_help && exit 0 ;;
+  *) minikube_main_help && exit 1 ;;
+  esac
+done
+bl64_dbg_set_level "$minikube_main_debug" && bl64_msg_set_level "$minikube_main_verbose" || exit $?
+minikube_main_initialize "$minikube_main_command" "$minikube_main_environment" "$minikube_main_profile" || exit $?
+
+bl64_msg_show_batch_start "$minikube_main_command"
+case "$minikube_main_command" in
+'cluster_start' | 'cluster_show' | 'cluster_stop' | 'cluster_delete') "minikube_main_${minikube_main_command}" ;;
+'certificate_deploy') "minikube_main_${minikube_main_command}" ;;
+*) bl64_check_alert_parameter_invalid "$minikube_main_command" ;;
+esac
+bl64_msg_show_batch_finish $? "$minikube_main_command"

@@ -2,7 +2,7 @@
 #######################################
 # Dev / Env / YAMLLint / Shared environment variables
 #
-# * Version: 1.1.0
+# * Version: 1.1.1
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -26,20 +26,23 @@
 # * Use .env file to override values
 #
 
-# Env / YAMLLint / Container Registry for tools
-export DEV_ENV_YAMLLINT_REGISTRY="${DEV_ENV_YAMLLINT_REGISTRY:-ghcr.io/automation64}"
-# Env / YAMLLint / Container path for project mounts
-export DEV_ENV_YAMLLINT_CONTAINER_PATH_ROOT='/project'
-# Lib / YAMLLint / Configuration
-export DEV_LIB_YAMLLINT_CFG='.yamllint'
-# Lib / YAMLLint / Installer
-export DEV_LIB_YAMLLINT_INSTALLER="${DEV_LIB_INSTALLER64_TARGET}/install-yamllint"
-# Lint / YAMLLint / Target
-export DEV_LINT_YAMLLINT_TARGET="${DEV_LINT_YAMLLINT_TARGET:-${DEV_PATH_SRC}}"
-# Lint / YAMLLint / Container with linting tool
-export DEV_LINT_YAMLLINT_CONTAINER="${DEV_LINT_YAMLLINT_CONTAINER:-yaml-lint/alpine-3-yaml-lint}"
-# Lint / YAMLLint / Container entrypoint
-export DEV_LINT_YAMLLINT_CONTAINER_ENTRYPOINT="${DEV_LINT_YAMLLINT_CONTAINER_ENTRYPOINT:-/usr/bin/yamllint}"
+# shellcheck disable=2154
+{
+    # Env / YAMLLint / Container Registry for tools
+    export DEV_ENV_YAMLLINT_REGISTRY="${DEV_ENV_YAMLLINT_REGISTRY:-ghcr.io/automation64}"
+    # Env / YAMLLint / Container path for project mounts
+    export DEV_ENV_YAMLLINT_CONTAINER_PATH_ROOT='/project'
+    # Lib / YAMLLint / Configuration
+    export DEV_LIB_YAMLLINT_CFG='.yamllint'
+    # Lib / YAMLLint / Installer
+    export DEV_LIB_YAMLLINT_INSTALLER="${DEV_LIB_INSTALLER64_TARGET}/install-yamllint"
+    # Lint / YAMLLint / Target
+    export DEV_LINT_YAMLLINT_TARGET="${DEV_LINT_YAMLLINT_TARGET:-${DEV_PATH_SRC}}"
+    # Lint / YAMLLint / Container with linting tool
+    export DEV_LINT_YAMLLINT_CONTAINER="${DEV_LINT_YAMLLINT_CONTAINER:-yaml-lint/alpine-3-yaml-lint}"
+    # Lint / YAMLLint / Container entrypoint
+    export DEV_LINT_YAMLLINT_CONTAINER_ENTRYPOINT="${DEV_LINT_YAMLLINT_CONTAINER_ENTRYPOINT:-/usr/bin/yamllint}"
+}
 
 #
 # Locals
@@ -47,9 +50,11 @@ export DEV_LINT_YAMLLINT_CONTAINER_ENTRYPOINT="${DEV_LINT_YAMLLINT_CONTAINER_ENT
 # * Use .local file or CICD variables to override values
 #
 
-# Lib / YAMLLint / Command
-export DEV_LIB_YAMLLINT_BIN="${DEV_LIB_YAMLLINT_BIN:-/usr/bin/yamllint}"
-
+# shellcheck disable=2154
+{
+    # Lib / YAMLLint / Command
+    export DEV_LIB_YAMLLINT_BIN="${DEV_LIB_YAMLLINT_BIN:-/usr/bin/yamllint}"
+}
 #
 # Secrets
 #

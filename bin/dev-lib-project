@@ -40,13 +40,20 @@ source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
 
 function dev_lib_project() {
   bl64_dbg_app_show_function
-  bl64_msg_show_task 'fix permissions for container access'
+  bl64_msg_show_task 'fix general permissions for container access'
   bl64_fs_fix_permissions '0755' '0755' \
     "$DEV_PATH_BIN" \
     "$DEV_PATH_SRC" \
     "$DEV_PATH_VAR" \
     "$DEV_PATH_ETC" \
-    "$DEV_PATH_TEST"
+    "$DEV_PATH_TEST" ||
+    return $?
+
+  bl64_msg_show_task 'fix vault permissions for container access'
+  bl64_fs_run_chmod '0755' \
+    "$DEV_PATH_VAULT" &&
+    bl64_fs_run_chmod '1777' \
+      "${DEV_PATH_VAULT}"/*
 }
 
 #

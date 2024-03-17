@@ -1,0 +1,185 @@
+#!/usr/bin/env bash
+# Template: 1.1.0
+#######################################
+# Kind / Control
+#
+# Control script for Minikube cluster
+#
+# Author: SerDigital64 (https://github.com/serdigital64)
+# Repository: https://github.com/automation64/gitops64
+# Version: 3.0.0
+#
+#######################################
+# Copyright [2023] [serdigital64@gmail.com]
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#######################################
+
+#
+# Imports
+#
+
+# shellcheck source=bin/dev-set
+source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
+
+# shellcheck source=src/infrastructure/gitops64/bl64/shared/setup
+source "${DEV_PATH_SRC}/infrastructure/gitops64/bl64/shared/setup" || { echo "Error: unable to load gitops64 bash lib" && exit 1; }
+
+# shellcheck source-path=lib/bl64source
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fmt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-bsh.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-xsv.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-ui.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-cnt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
+
+#
+# Globals
+#
+
+export NGINX_MAIN_CONFIG=''
+export NGINX_MAIN_NAME='k8s-reverse-proxy'
+
+#
+# Functions
+#
+
+function nginx_main_proxy_start() {
+  bl64_dbg_app_show_function
+  bl64_msg_show_task "start proxy"
+  bl64_cnt_run \
+    -d \
+    --name "$NGINX_MAIN_NAME" \
+    --network host \
+    --volume "${NGINX_MAIN_CONFIG}:/etc/nginx/conf.d" \
+    nginx
+}
+
+function nginx_main_proxy_delete() {
+  bl64_dbg_app_show_function
+  bl64_ui_ask_confirmation \
+    'Do you want to completely destroy the proxy?. Confirm by typing:' \
+    'YES' &&
+    bl64_cnt_cli \
+      stop \
+      "$NGINX_MAIN_NAME" &&
+    bl64_cnt_cli \
+      rm \
+      "$NGINX_MAIN_NAME"
+}
+
+function nginx_main_proxy_show() {
+  bl64_dbg_app_show_function
+  bl64_cnt_cli \
+    inspect \
+    "$NGINX_MAIN_NAME"
+}
+
+#######################################
+# Initialize environment
+#
+# Arguments:
+#   None
+# Outputs:
+#   Initializacion progress messages
+# Returns:
+#   0: initialization ok
+#   >: failed to initialize
+#######################################
+function nginx_main_initialize() {
+  bl64_dbg_app_show_function "@"
+  # shellcheck disable=SC2034
+  local command="$1"
+  local environment="$2"
+  local profile="$3"
+
+  # shellcheck disable=SC2015
+  bl64_check_parameter 'command' &&
+    bl64_check_parameter 'profile' &&
+    bl64_check_parameter 'environment' ||
+    { nginx_main_help && return 1; }
+
+  bl64_cnt_setup ||
+    return $?
+
+  gitops64_initialize "$environment" ||
+    return $?
+
+  NGINX_MAIN_CONFIG="${DEV_PATH_ETC}/${environment}/infrastructure/nginx/nginx-${profile}"
+  bl64_check_file "${NGINX_MAIN_CONFIG}/proxy.conf"
+}
+
+#######################################
+# Show script usage description
+#
+# Arguments:
+#   None
+# Outputs:
+#   Command line format and description
+# Returns:
+#   0
+#######################################
+function nginx_main_help() {
+  bl64_msg_show_usage \
+    '<-c|-s|-d> -e Environment -p Profile [-V Verbose] [-D Debug] [-h]' \
+    'NGINX reverse proxy control wrapper' \
+    '
+    -c            : Start proxy
+    -s            : Show proxy details
+    -d            : Delete (destroy) proxy
+    ' '
+    -h            : Show help
+    ' '
+    -e Environment: Environment name
+    -p Profile    : Configuration profile
+    -V Verbose    : Set verbosity level. Format: one of BL64_MSG_VERBOSE_*
+    -D Debug      : Enable debugging mode. Format: one of BL64_DBG_TARGET_*
+    '
+}
+
+#
+# Main
+#
+
+declare nginx_main_debug="$BL64_DBG_TARGET_NONE"
+declare nginx_main_verbose="$BL64_MSG_VERBOSE_APP"
+declare nginx_main_command="$BL64_VAR_NULL"
+declare nginx_main_option=''
+declare nginx_main_environment="$BL64_VAR_NULL"
+declare nginx_main_profile="$BL64_VAR_DEFAULT"
+
+(($# == 0)) && nginx_main_help && exit 1
+while getopts ':csde:p:V:D:h' nginx_main_option; do
+  case "$nginx_main_option" in
+  c) nginx_main_command='proxy_start' ;;
+  s) nginx_main_command='proxy_show' ;;
+  d) nginx_main_command='proxy_delete' ;;
+  e) nginx_main_environment="$OPTARG" ;;
+  p) nginx_main_profile="$OPTARG" ;;
+  V) nginx_main_verbose="$OPTARG" ;;
+  D) nginx_main_debug="$OPTARG" ;;
+  h) nginx_main_help && exit 0 ;;
+  *) nginx_main_help && exit 1 ;;
+  esac
+done
+bl64_dbg_set_level "$nginx_main_debug" && bl64_msg_set_level "$nginx_main_verbose" || exit $?
+nginx_main_initialize "$nginx_main_command" "$nginx_main_environment" "$nginx_main_profile" || exit $?
+
+bl64_msg_show_batch_start "$nginx_main_command"
+case "$nginx_main_command" in
+'proxy_start' | 'proxy_show' | 'proxy_stop' | 'proxy_delete') "nginx_main_${nginx_main_command}" ;;
+*) bl64_check_alert_parameter_invalid "$nginx_main_command" ;;
+esac
+bl64_msg_show_batch_finish $? "$nginx_main_command"

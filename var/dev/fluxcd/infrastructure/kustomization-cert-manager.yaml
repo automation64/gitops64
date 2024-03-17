@@ -9,7 +9,7 @@ spec:
   timeout: "5m0s"
   prune: true
   wait: true
-  path: "./etc/dev/cert-manager/fluxcd"
+  path: "./etc/dev/cert-manager/fluxcd/default"
   dependsOn:
     - name: "metrics-server"
   sourceRef:

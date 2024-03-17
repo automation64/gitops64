@@ -13,4 +13,6 @@ source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2
 
 ./bin/dev-lib-installer64 &&
   ./bin/dev-lib-testmansh &&
+  ./bin/dev-lib-argocd &&
+  ./bin/dev-lib-helm &&
   ./bin/dev-lib-project

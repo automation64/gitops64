@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.0]
+
+### Added
+
+- ArgoCD
+  - control-service: added get default admin password option
+
+### Changed
+
+- All
+  **breaking change** migrated to new directory structure:
+    - configuration: `etc/ENVIRONMENT/GROUP/MODULE/DRIVER/PROFILE`
+    - source: `src/GROUP/MODULE/DRIVER/PROFILE`
+- ArgoCD
+  - **breaking change** control-application: migrated to app-of-apps pattern. New `root` application now manages `infrastructure`, `application`, `kubernetes` and `resources` app groups.
+
+### Fixed
+
+- ArgoCD
+  - Added missing `finalizer` setting from Application object
+
 ## [5.0.0]
 
 ### Changed
@@ -184,6 +205,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
+[6.0.0]: https://github.com/automation64/gitops64/compare/5.0.0...6.0.0
 [5.0.0]: https://github.com/automation64/gitops64/compare/4.0.0...5.0.0
 [4.0.0]: https://github.com/automation64/gitops64/compare/3.2.0...4.0.0
 [3.2.0]: https://github.com/automation64/gitops64/compare/3.1.0...3.2.0

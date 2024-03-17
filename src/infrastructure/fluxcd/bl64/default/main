@@ -1,0 +1,200 @@
+#!/usr/bin/env bash
+# Template: 1.1.0
+#######################################
+# FluxCD / Control
+#
+# Control script for FluxCD service
+#
+# Author: SerDigital64 (https://github.com/serdigital64)
+# Repository: https://github.com/automation64/gitops64
+# Version: 4.0.0
+#
+#######################################
+# Copyright [2023] [serdigital64@gmail.com]
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#######################################
+
+#
+# Imports
+#
+
+# shellcheck source=bin/dev-set
+source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
+
+# shellcheck source=src/infrastructure/gitops64/bl64/shared/setup
+source "${DEV_PATH_SRC}/infrastructure/gitops64/bl64/shared/setup" || { echo "Error: unable to load gitops64 bash lib" && exit 1; }
+
+# shellcheck source-path=lib/bl64source
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-bsh.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-xsv.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-k8s.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fmt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-ui.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || { echo "Error: unable to load bashlib64" && exit 1; }
+
+#
+# Globals
+#
+
+export FLUXCD_MAIN_FLUX_BIN="${FLUXCD_MAIN_FLUX_BIN:-/usr/local/bin/flux}"
+export FLUXCD_MAIN_GH_BIN="${FLUXCD_MAIN_GH_BIN:-${DEV_LIB_GITHUB_BIN}}"
+
+#
+# Functions
+#
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function fluxcd_main_bootstrap() {
+  bl64_dbg_app_show_function
+  "$FLUXCD_MAIN_GH_BIN" auth token |
+    "$FLUXCD_MAIN_FLUX_BIN" \
+      bootstrap github \
+      --private \
+      --verbose \
+      --cache-dir="$DEV_PATH_TMP" \
+      --context="$G64_FLUXCD_CLUSTER_CONTEXT" \
+      --owner="$G64_FLUXCD_CLUSTER_OWNER" \
+      --repository="$G64_FLUXCD_CLUSTER_REPOSITORY" \
+      --branch="$G64_FLUXCD_CLUSTER_BRANCH" \
+      --path="$G64_FLUXCD_CLUSTER_PATH" \
+      --timeout="$FLUXCD_TIMEOUT"
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function fluxcd_main_cleanup() {
+  bl64_dbg_app_show_function
+  local flux_system="${G64_FLUXCD_CLUSTER_PATH}/flux-system"
+  bl64_msg_show_task "remove FluxCD from GIT (${flux_system})"
+  if [[ -d "$flux_system" ]]; then
+    bl64_fs_rm_full "$flux_system"
+  fi
+  return 0
+}
+
+# Required to prevent false positive on YAML generated shell-env
+# shellcheck disable=SC2154
+function fluxcd_main_uninstall() {
+  bl64_dbg_app_show_function
+  bl64_msg_show_task "uninstall FluxCD from cluster (${G64_FLUXCD_CLUSTER_CONTEXT})"
+  bl64_ui_ask_confirmation \
+    'Do you want to uninstall FluxCD from the current cluster?. Confirm by typing:' 'YES' &&
+    "$FLUXCD_MAIN_FLUX_BIN" \
+      uninstall \
+      --verbose \
+      --silent \
+      --cache-dir="$DEV_PATH_TMP" \
+      --context="$G64_FLUXCD_CLUSTER_CONTEXT" &&
+    fluxcd_main_cleanup
+}
+
+#######################################
+# Initialize environment
+#
+# Arguments:
+#   None
+# Outputs:
+#   Initializacion progress messages
+# Returns:
+#   0: initialization ok
+#   >: failed to initialize
+#######################################
+function fluxcd_main_initialize() {
+  bl64_dbg_app_show_function "@"
+  local command="$1"
+  local environment="$2"
+  local profile="$3"
+
+  # shellcheck disable=SC2015
+  bl64_check_parameter 'command' &&
+    bl64_check_parameter 'environment' ||
+    { fluxcd_main_help && return 1; }
+
+  bl64_check_command "$FLUXCD_MAIN_FLUX_BIN" &&
+    bl64_check_command "$FLUXCD_MAIN_GH_BIN" &&
+    bl64_k8s_setup ||
+    return $?
+
+  gitops64_initialize "$environment" &&
+    gitops64_setup_load "$environment" 'infrastructure/fluxcd' "$profile" 'gitops64' &&
+    bl64_check_export 'G64_FLUXCD_CLUSTER_BRANCH' &&
+    bl64_check_export 'G64_FLUXCD_CLUSTER_CONTEXT' &&
+    bl64_check_export 'G64_FLUXCD_CLUSTER_OWNER' &&
+    bl64_check_export 'G64_FLUXCD_CLUSTER_PATH' &&
+    bl64_check_export 'G64_FLUXCD_CLUSTER_REPOSITORY'
+}
+
+#######################################
+# Show script usage description
+#
+# Arguments:
+#   None
+# Outputs:
+#   Command line format and description
+# Returns:
+#   0
+#######################################
+function fluxcd_main_help() {
+  bl64_msg_show_usage \
+    '<-c|-d> -e Environment -p Profile [-V Verbose] [-D Debug] [-h]' \
+    'Manage FluxCD service deployment' \
+    '
+    -c            : Bootstrap (install) FluxCD to the target environment using GitHub
+    -d            : Uninstall FluxCD from cluster
+    ' '
+    -h            : Show help
+    ' '
+    -e Environment: Environment name
+    -p Profile    : Configuration profile
+    -V Verbose    : Set verbosity level. Format: one of BL64_MSG_VERBOSE_*
+    -D Debug      : Enable debugging mode. Format: one of BL64_DBG_TARGET_*
+    '
+}
+
+#
+# Main
+#
+
+declare fluxcd_main_debug="$BL64_DBG_TARGET_NONE"
+declare fluxcd_main_verbose="$BL64_MSG_VERBOSE_APP"
+declare fluxcd_main_command="$BL64_VAR_NULL"
+declare fluxcd_main_option=''
+declare fluxcd_main_environment="$BL64_VAR_NULL"
+declare fluxcd_main_profile="$BL64_VAR_DEFAULT"
+
+(($# == 0)) && fluxcd_main_help && exit 1
+while getopts ':cde:p:V:D:h' fluxcd_main_option; do
+  case "$fluxcd_main_option" in
+  c) fluxcd_main_command='bootstrap' ;;
+  d) fluxcd_main_command='uninstall' ;;
+  e) fluxcd_main_environment="$OPTARG" ;;
+  p) fluxcd_main_profile="$OPTARG" ;;
+  V) fluxcd_main_verbose="$OPTARG" ;;
+  D) fluxcd_main_debug="$OPTARG" ;;
+  h) fluxcd_main_help && exit 0 ;;
+  *) fluxcd_main_help && exit 1 ;;
+  esac
+done
+bl64_dbg_set_level "$fluxcd_main_debug" && bl64_msg_set_level "$fluxcd_main_verbose" || exit $?
+fluxcd_main_initialize "$fluxcd_main_command" "$fluxcd_main_environment" "$fluxcd_main_profile" || exit $?
+
+bl64_msg_show_batch_start "${fluxcd_main_command}"
+case "$fluxcd_main_command" in
+'bootstrap' | 'uninstall') "fluxcd_main_${fluxcd_main_command}" ;;
+*) bl64_check_alert_parameter_invalid "$fluxcd_main_command" ;;
+esac
+bl64_msg_show_batch_finish $? "$fluxcd_main_command"

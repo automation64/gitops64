@@ -1,0 +1,12 @@
+---
+apiVersion: "kustomize.config.k8s.io/v1beta1"
+kind: "Kustomization"
+
+resources:
+  - "../../../../../../src/infrastructure/argocd/argocd/default"
+patches:
+  - path: "application-kubernetes.patch.yaml"
+  - path: "application-infrastructure.patch.yaml"
+  - path: "application-resources.patch.yaml"
+  - path: "application-applications.patch.yaml"
+...

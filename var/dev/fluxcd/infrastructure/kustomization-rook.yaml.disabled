@@ -9,7 +9,7 @@ spec:
   timeout: "25m0s"
   prune: true
   wait: true
-  path: "./etc/dev/rook/fluxcd"
+  path: "./etc/dev/rook/fluxcd/default"
   dependsOn:
     - name: "metrics-server"
     - name: "cert-manager"

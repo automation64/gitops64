@@ -5,10 +5,11 @@ resources:
   #
   # Platform specific
   #
-  # - "../../../../etc/dev/kubernetes/minikube/argocd"
+  # disabled # - "../../../../etc/dev/kubernetes/minikube/argocd"
+
   #
   # Core modules
   #
-  - "../../../../etc/dev/kubernetes/metrics-server/argocd"
-  - "../../../../etc/dev/kubernetes/gateway-api/argocd"
+  - "../../../../etc/dev/kubernetes/metrics-server/argocd/default"
+  - "../../../../etc/dev/kubernetes/gateway-api/argocd/default"
 ...
