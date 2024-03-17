@@ -9,7 +9,7 @@ spec:
   timeout: "5m0s"
   prune: true
   wait: true
-  path: "./etc/dev/metrics-server/fluxcd"
+  path: "./etc/dev/metrics-server/fluxcd/default"
   sourceRef:
     kind: "GitRepository"
     name: "flux-system"

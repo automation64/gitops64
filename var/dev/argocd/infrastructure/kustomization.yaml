@@ -5,23 +5,23 @@ resources:
   #
   # Core modules
   #
-  - "../../../../etc/dev/infrastructure/sealed-secrets/argocd"
-  - "../../../../etc/dev/infrastructure/cert-manager/argocd"
+  - "../../../../etc/dev/infrastructure/sealed-secrets/argocd/default"
+  - "../../../../etc/dev/infrastructure/cert-manager/argocd/default"
   #
   # Optional modules
   #
-  - "../../../../etc/dev/infrastructure/metallb/argocd"
-  # disabled # - "../../../../etc/dev/infrastructure/prometheus/argocd-small"
-  # disabled # - "../../../../etc/dev/infrastructure/grafana/argocd-small-prometheus"
-  # disabled # - "../../../../etc/dev/infrastructure/fluent-bit/argocd-loki"
-  # disabled # - "../../../../etc/dev/infrastructure/loki/argocd-small"
-  # disabled # - "../../../../etc/dev/infrastructure/istio-system/argocd-small"
-  # disabled # - "../../../../etc/dev/infrastructure/istio-ingress/argocd-istio-api"
-  # disabled # - "../../../../etc/dev/infrastructure/kiali/argocd-small"
-  # disabled # - "../../../../etc/dev/infrastructure/k8s-dashboard/argocd-small-insecure"
-  # disabled # - "../../../../etc/dev/infrastructure/wordpress/argocd-small"
-  # disabled # - "../../../../etc/dev/infrastructure/k8s-secrets-store/argocd"
-  # disabled # - "../../../../etc/dev/infrastructure/vault/argocd"
-  # disabled # - "../../../../etc/dev/infrastructure/opensearch/argocd"
-  # disabled # - "../../../../etc/dev/infrastructure/mysql-operator/argocd"
+  # disabled # - "../../../../etc/dev/infrastructure/metallb/argocd/default"
+  # disabled # - "../../../../etc/dev/infrastructure/prometheus/argocd/small"
+  # disabled # - "../../../../etc/dev/infrastructure/grafana/argocd/small-prometheus"
+  # disabled # - "../../../../etc/dev/infrastructure/fluent-bit/argocd/loki"
+  # disabled # - "../../../../etc/dev/infrastructure/loki/argocd/small"
+  # disabled # - "../../../../etc/dev/infrastructure/istio-system/argocd/small"
+  # disabled # - "../../../../etc/dev/infrastructure/istio-ingress/argocd/istio-api"
+  # disabled # - "../../../../etc/dev/infrastructure/kiali/argocd/small"
+  # disabled # - "../../../../etc/dev/infrastructure/k8s-dashboard/argocd/small-insecure"
+  # disabled # - "../../../../etc/dev/infrastructure/wordpress/argocd/small"
+  # disabled # - "../../../../etc/dev/infrastructure/k8s-secrets-store/argocd/default"
+  # disabled # - "../../../../etc/dev/infrastructure/vault/argocd/default"
+  # disabled # - "../../../../etc/dev/infrastructure/opensearch/argocd/default"
+  # disabled # - "../../../../etc/dev/infrastructure/mysql-operator/argocd/default"
 ...

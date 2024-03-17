@@ -1,0 +1,9 @@
+---
+apiVersion: "kustomize.config.k8s.io/v1beta1"
+kind: "Kustomization"
+
+resources:
+  - "../../../../../../src/applications/httpbin/kustomize/nodeport"
+patches:
+  - path: "deployment.patch.yaml"
+...

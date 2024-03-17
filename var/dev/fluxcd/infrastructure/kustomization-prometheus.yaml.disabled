@@ -9,7 +9,7 @@ spec:
   timeout: "5m0s"
   prune: true
   wait: true
-  path: "./etc/dev/prometheus/fluxcd"
+  path: "./etc/dev/prometheus/fluxcd/default"
   dependsOn:
     - name: "metrics-server"
     - name: "cert-manager"

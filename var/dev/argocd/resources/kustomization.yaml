@@ -5,7 +5,7 @@ resources:
   #
   # Core resources
   #
-  - "../../../../etc/dev/resources/ca-selfsigned/argocd"
+  - "../../../../etc/dev/resources/ca-selfsigned/argocd/default"
   #
   # Gateway resources
   #

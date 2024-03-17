@@ -1,0 +1,12 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "root-infrastructure"
+  namespace: "argocd"
+spec:
+  source:
+    repoURL: "git@github.com:itc64-dev/test-gitops.git"
+#    targetRevision: "HEAD"
+    targetRevision: "feature/update"
+...

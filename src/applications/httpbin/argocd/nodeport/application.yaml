@@ -1,0 +1,17 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "httpbin"
+  namespace: "argocd"
+spec:
+  project: "httpbin"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "httpbin"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+...

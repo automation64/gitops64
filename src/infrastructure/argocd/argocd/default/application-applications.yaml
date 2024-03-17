@@ -1,0 +1,19 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "root-applications"
+  namespace: "argocd"
+spec:
+  project: "root"
+  source:
+    path: "var/dev/argocd/applications"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "argocd"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+...

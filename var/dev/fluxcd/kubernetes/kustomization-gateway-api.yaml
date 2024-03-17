@@ -9,7 +9,7 @@ spec:
   timeout: "5m0s"
   prune: true
   wait: true
-  path: "./etc/dev/gateway-api/fluxcd"
+  path: "./etc/dev/gateway-api/fluxcd/default"
   dependsOn: []
   sourceRef:
     kind: "GitRepository"

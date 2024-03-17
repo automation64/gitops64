@@ -9,7 +9,7 @@ spec:
   timeout: "5m0s"
   prune: true
   wait: true
-  path: "./etc/dev/istio-system/fluxcd"
+  path: "./etc/dev/istio-system/fluxcd/small"
   dependsOn:
     - name: "metrics-server"
     - name: "cert-manager"

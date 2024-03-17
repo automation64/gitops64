@@ -9,7 +9,7 @@ spec:
   timeout: "5m0s"
   prune: true
   wait: true
-  path: "./etc/dev/istio-ingress/fluxcd-istio-api"
+  path: "./etc/dev/istio-ingress/fluxcd/istio-api"
   dependsOn:
     - name: "istio-system"
   sourceRef:

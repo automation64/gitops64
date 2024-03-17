@@ -1,0 +1,22 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "kiali"
+  namespace: "argocd"
+  finalizers:
+    - "resources-finalizer.argocd.argoproj.io"
+spec:
+  project: "kiali"
+  source:
+    chart: "kiali-server"
+    repoURL: "https://kiali.org/helm-charts"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "kiali"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+...

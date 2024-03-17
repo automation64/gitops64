@@ -1,0 +1,11 @@
+---
+apiVersion: "kustomize.config.k8s.io/v1beta1"
+kind: "Kustomization"
+
+resources:
+  - "../../../../../../src/infrastructure/grafana/argocd/default"
+patches:
+  - path: "application.patch.yaml"
+  - path: "application-loki.patch.yaml"
+  - path: "application-prometheus.patch.yaml"
+...
