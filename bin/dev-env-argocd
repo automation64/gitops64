@@ -2,7 +2,7 @@
 #######################################
 # Dev / Env / ArgoCD / Shared environment variables
 #
-# * Version: 1.0.0
+# * Version: 1.0.1
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -26,10 +26,13 @@
 # * Use .env file to override values
 #
 
-# Lib / ArgoCD / Installer
-export DEV_LIB_ARGOCD_INSTALLER="${DEV_LIB_INSTALLER64_TARGET}/install-argocdcli"
-# Lint / ArgoCD / Target
-export DEV_LINT_ARGOCD_TARGET="${DEV_LINT_ARGOCD_TARGET:-${DEV_PATH_LIB}/argocd}"
+# shellcheck disable=2154
+{
+    # Lib / ArgoCD / Installer
+    export DEV_LIB_ARGOCD_INSTALLER="${DEV_LIB_INSTALLER64_TARGET}/install-argocdcli"
+    # Lib / ArgoCD / Target
+    export DEV_LIB_ARGOCD_TARGET="${DEV_LIB_ARGOCD_TARGET:-${DEV_PATH_LIB}/argocd}"
+}
 
 #
 # Locals
@@ -37,8 +40,11 @@ export DEV_LINT_ARGOCD_TARGET="${DEV_LINT_ARGOCD_TARGET:-${DEV_PATH_LIB}/argocd}
 # * Use .local file or CICD variables to override values
 #
 
-# Lib / ArgoCD / Command
-export DEV_LIB_ARGOCD_BIN="${DEV_LIB_ARGOCD_BIN:-${DEV_LINT_ARGOCD_TARGET}/argocd}"
+# shellcheck disable=2154
+{
+    # Lib / ArgoCD / Command
+    export DEV_LIB_ARGOCD_BIN="${DEV_LIB_ARGOCD_BIN:-${DEV_LIB_ARGOCD_TARGET}/argocd}"
+}
 
 #
 # Secrets

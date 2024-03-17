@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 #######################################
-# Dev / CLI / TaskFile / Command runner for interactive shell
+# Dev / Lib / Helm / Download
 #
-# * Use to run the command in an interactive shell
-# * Associated shell environment is loaded before command execution
-# * Any other dev task that needs to use the command should call it directly, not using this wrapper
 # * Version: 1.0.0
 #
 #######################################
@@ -29,11 +26,35 @@
 
 # shellcheck source=bin/dev-set
 source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
-# shellcheck source=bin/dev-env-taskfile
-source ./bin/dev-env-taskfile || exit 1
+# shellcheck source-path=bin
+source ./bin/dev-env-helm || exit 1
+# shellcheck source-path=lib/bl64
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || exit 1
+
+#
+# Functions
+#
+
+function dev_lib_argocd() {
+  bl64_dbg_app_show_function
+  INST64_HELM_TARGET="$DEV_LIB_HELM_TARGET" \
+    INST64_HELM_SYSTEM_WIDE='NO' \
+    "${DEV_LIB_HELM_INSTALLER}"
+}
+
+function dev_lib_initialize() {
+  bl64_dbg_app_show_function
+  bl64_check_file "$DEV_LIB_HELM_INSTALLER"
+}
 
 #
 # Main
 #
 
-"$DEV_LIB_TASKFILE_BIN" "$@"
+[[ -n "$DEV_CICD_DEBUG" ]] && bl64_dbg_all_enable
+
+bl64_msg_all_enable_verbose
+bl64_msg_show_batch_start 'dev-lib-helm'
+dev_lib_initialize &&
+  dev_lib_argocd
+bl64_msg_show_batch_finish $? 'dev-lib-helm'

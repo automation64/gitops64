@@ -37,7 +37,7 @@ source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || exit 1
 
 function dev_lib_argocd() {
   bl64_dbg_app_show_function
-  INST64_ARGOCDCLI_TARGET="$DEV_LINT_ARGOCD_TARGET" \
+  INST64_ARGOCDCLI_TARGET="$DEV_LIB_ARGOCD_TARGET" \
     INST64_ARGOCDCLI_SYSTEM_WIDE='NO' \
     "${DEV_LIB_ARGOCD_INSTALLER}"
 }

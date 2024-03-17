@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #######################################
-# Dev / Env / TestManSH / Shared environment variables
+# Dev / Env / Kubelint / Shared environment variables
 #
-# * Version: 1.1.2
+# * Version: 1.0.1
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -28,14 +28,16 @@
 
 # shellcheck disable=2154
 {
-    # Lib / TestmanSH / Command
-    export DEV_LIB_TESTMANSH_BIN="${DEV_PATH_LIB}/testmansh"
-    # Lint / TestmanSH / Sources
-    export DEV_LINT_TESTMANSH_SOURCE="${DEV_LINT_TESTMANSH_SOURCE:-${DEV_BASE_SRC}}"
-    # Test / TestmanSH / Container
-    export DEV_TEST_TESTMANSH_CONTAINER="${DEV_TEST_TESTMANSH_CONTAINER:-bash-test/alpine-3-bash-test}"
-    # Test / TestmanSH / Cases
-    export DEV_TEST_TESTMANSH_CASES="${DEV_TEST_TESTMANSH_CASES:-${DEV_BASE_TEST}/batscore}"
+    # Env / Kubelint / Container Registry for tools
+    export DEV_ENV_KUBELINT_REGISTRY="${DEV_ENV_KUBELINT_REGISTRY:-ghcr.io/automation64}"
+    # Env / Kubelint / Container path for project mounts
+    export DEV_ENV_KUBELINT_CONTAINER_PATH_ROOT='/project'
+    # Lint / Kubelint / Target
+    export DEV_LINT_KUBELINT_TARGET="${DEV_LINT_KUBELINT_TARGET:-${DEV_BASE_SRC}}"
+    # Lint / Kubelint / Container with linting tool
+    export DEV_LINT_KUBELINT_CONTAINER="${DEV_LINT_KUBELINT_CONTAINER:-k8s-lint/alpine-3-k8s-lint}"
+    # Lint / Kubelint / Container entrypoint
+    export DEV_LINT_KUBELINT_CONTAINER_ENTRYPOINT="${DEV_LINT_KUBELINT_CONTAINER_ENTRYPOINT:-/usr/local/bin/kube-linter}"
 }
 
 #
@@ -43,6 +45,12 @@
 #
 # * Use .local file or CICD variables to override values
 #
+
+# shellcheck disable=2154
+{
+    # Lib / Kubelint / Command
+    export DEV_LIB_KUBELINT_BIN="${DEV_LIB_KUBELINT_BIN:-/usr/local/bin/kube-linter}"
+}
 
 #
 # Secrets

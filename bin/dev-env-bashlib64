@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #######################################
-# Dev / Env / TaskFile / Shared environment variables
+# Dev / Env / BashLib64 / Shared environment variables
 #
 # * Version: 1.0.0
 #
@@ -26,19 +26,17 @@
 # * Use .env file to override values
 #
 
-# Lib / TaskFile / Installer
-export DEV_LIB_TASKFILE_INSTALLER="${DEV_LIB_INSTALLER64_TARGET}/install-taskfile"
-# Lint / TaskFile / Target
-export DEV_LINT_TASKFILE_TARGET="${DEV_LINT_TASKFILE_TARGET:-${DEV_PATH_LIB}/taskfile}"
+# shellcheck disable=2154
+{
+    # Lib / BashLib64 / Location
+    export DEV_LIB_BASHLIB64_TARGET="${DEV_LIB_BASHLIB64_TARGET:-${DEV_PATH_LIB}/bl64}"
+}
 
 #
 # Locals
 #
 # * Use .local file or CICD variables to override values
 #
-
-# Lib / TaskFile / Command
-export DEV_LIB_TASKFILE_BIN="${DEV_LIB_TASKFILE_BIN:-${DEV_LINT_TASKFILE_TARGET}/task}"
 
 #
 # Secrets

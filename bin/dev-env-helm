@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 #######################################
-# Dev / CLI / ArgoCD / Command runner for interactive shell
+# Dev / Env / Helm / Shared environment variables
 #
-# * Use to run the command in an interactive shell
-# * Associated shell environment is loaded before command execution
-# * Any other dev task that needs to use the command should call it directly, not using this wrapper
-# * Version: 1.0.0
+# * Version: 1.0.1
 #
 #######################################
 # Copyright [2023] [serdigital64@gmail.com]
@@ -24,16 +21,33 @@
 #######################################
 
 #
-# Imports
+# Globals
+#
+# * Use .env file to override values
 #
 
-# shellcheck source=bin/dev-set
-source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
-# shellcheck source=bin/dev-env-argocd
-source ./bin/dev-env-argocd || exit 1
+# shellcheck disable=2154
+{
+    # Lib / Helm / Installer
+    export DEV_LIB_HELM_INSTALLER="${DEV_LIB_INSTALLER64_TARGET}/install-helm"
+    # Lib / Helm / Target
+    export DEV_LIB_HELM_TARGET="${DEV_LIB_HELM_TARGET:-${DEV_PATH_LIB}/helm}"
+}
 
 #
-# Main
+# Locals
+#
+# * Use .local file or CICD variables to override values
 #
 
-"$DEV_LIB_ARGOCD_BIN" "$@"
+# shellcheck disable=2154
+{
+    # Lib / Helm / Command
+    export DEV_LIB_HELM_BIN="${DEV_LIB_HELM_BIN:-${DEV_LIB_HELM_TARGET}/helm}"
+}
+
+#
+# Secrets
+#
+# * Use .secrets file or CICD secrets to override values
+#
