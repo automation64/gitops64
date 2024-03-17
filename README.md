@@ -58,13 +58,15 @@ Use the following procedure to deploy GitOps64 for testing purposes on a Minikub
   - Bash
   - Curl
   - YamlQuery (yq)
-  - GitHub CLI
+  - (\*) GitHub CLI
 - Kubernetes
   - KubeCTL
   - Minikube or Kind
   - Helm CLI
 - GitOps
-  - FluxCD or ArgoCD CLI
+  - (\*) FluxCD or ArgoCD CLI
+
+Tools marked with (\*) are not needed locally if using the lab container (`dev-lab-kind`)
 
 #### Infrastructure
 
@@ -73,40 +75,29 @@ Use the following procedure to deploy GitOps64 for testing purposes on a Minikub
 
 ### Installation
 
-- Login to GitHub using the GH CLI
-
-```shell
-gh auth login
-```
-
 - Fork this repository to your GitHub account
 - Clone the forked repository to your workstation
 
-```shell
-git clone <FORKED_REPOSITORY>
-cd gitops64
-```
+  ```shell
+  git clone <FORKED_REPOSITORY>
+  cd gitops64
+  ```
 
 - Initialize dev time resources
 
-```shell
-./bin/dev-lib-local &&
-./bin/dev-lib-base
-```
-
-- (FluxCD only) Turn off the following filter from `.gitignore` file:
-
-```shell
-# FluxCD / Upstream only: do not save FluxCD deployment
-var/fluxcd/*/flux-system
-```
+  ```shell
+  ./bin/dev-lib-local &&
+  ./bin/dev-lib-base
+  ```
 
 - Review and update dev-environment configuration as needed: `etc/<ENVIRONMENT>`, in particular values marked with replacement tags `X_..._X`
+
   - [FluxCD](etc/dev/infrastructure/argocd/bl64-nodeport/gitops64.yaml)
   - [ArgoCD](etc/dev/infrastructure/fluxcd/bl64-minikube/gitops64.yaml)
   - [GitHub](etc/dev/infrastructure/github/bl64-default/gitops64.yaml)
 
 - Review and update enabled modules: `var/<ENVIRONMENT>`:
+
   - FluxCD
     - [kubernetes](var/dev/fluxcd/kubernetes/)
     - [infrastructure](var/dev/fluxcd/infrastructure/)
@@ -117,40 +108,58 @@ var/fluxcd/*/flux-system
     - [resources](var/dev/argocd/resources/kustomization.yaml)
     - [applications](var/dev/argocd/applications/kustomization.yaml)
 
-- Create dev/test environment
+- Create dev/test kubernetes cluster
+
   - Using Minikube
 
+  ```shell
+  ./src/kubernetes/minikube/bl64/default/main -e dev -p kvm-medium -c &&
+  ./src/kubernetes/minikube/bl64/default/main -e dev -p kvm-medium -s
+  ```
+
+- Using Kind
+
 ```shell
-./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -c &&
-./src/kubernetes/minikube/bl64/control -e dev -p kvm-medium -s
+./src/kubernetes/kind/bl64/default/main -e dev -p medium -c &&
+./src/kubernetes/kind/bl64/default/main -e dev -p medium -s
 ```
 
-  - Using Kind
+- (optional) Open lab container environment for running gitops tasks
 
 ```shell
-./src/kubernetes/kind/bl64/control -e dev -p medium -c &&
-./src/kubernetes/kind/bl64/control -e dev -p medium -s
+./bin/dev-lab-kind
 ```
+
+- Setup private GitHub repository access
+
+  ```shell
+  ./src/infrastructure/github/bl64/default/main -e dev -l &&
+  ./src/infrastructure/github/bl64/default/main -e dev -a
+  ```
 
 - Deploy GitOps service to Kubernetes
+
   - Using ArgoCD:
 
-```shell
-./src/infrastructure/argocd/bl64/control-service -e dev -p nodeport -c &&
-./src/infrastructure/argocd/bl64/control-service -e dev -p nodeport -l &&
-./src/infrastructure/argocd/bl64/control-application -e dev -p nodeport -c
-```
+  ```shell
+  ./src/infrastructure/argocd/bl64/default/main -e dev -p nodeport -c &&
+  ./src/infrastructure/argocd/bl64/default/main -e dev -p nodeport -l &&
+  ./src/infrastructure/argocd/bl64/default/main -e dev -p nodeport -k
+  ```
 
   - Using FluxCD:
 
-```shell
-./src/infrastructure/fluxcd/bl64/control -e dev -p github -c
-```
+    - Remove the following line from .`gitignore`: `var/fluxcd/*/flux-system`
+    - Deploy FluxCD:
+
+    ```shell
+    ./src/infrastructure/fluxcd/bl64/default/main -e dev -p github -c
+    ```
 
 - (optional) Start NGINX to proxy MetalLB. This will allow local connections from the workstation to exposed cluster services of LoadBalancer type
 
 ```shell
-./src/infrastructure/nginx/bl64/control -e dev -p k8s -c
+./src/infrastructure/nginx/bl64/default/main -e dev -p k8s -c
 ```
 
 ## Operation
@@ -160,7 +169,7 @@ var/fluxcd/*/flux-system
 Use to stop and remove the NGIX container
 
 ```shell
-./src/infrastructure/nginx/bl64/control -e dev -p k8s -d
+./src/infrastructure/nginx/bl64/default/main -e dev -p k8s -d
 ```
 
 ### Remove Kind K8S cluster
@@ -168,7 +177,7 @@ Use to stop and remove the NGIX container
 Use to stop and **destroy** the cluster and deployed applications
 
 ```shell
-./src/kubernetes/kind/bl64/control -e dev -p medium -d
+./src/kubernetes/kind/bl64/default/main -e dev -p medium -d
 ```
 
 ## Contributing
