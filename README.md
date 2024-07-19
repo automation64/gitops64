@@ -2,8 +2,11 @@
 
 - [Project: GITOps64](#project-gitops64)
   - [Overview](#overview)
-    - [Directory structure](#directory-structure)
-    - [Applications](#applications)
+  - [Design Requirements](#design-requirements)
+  - [IaC Repository Organization](#iac-repository-organization)
+    - [Main directory structure](#main-directory-structure)
+    - [Modules types](#modules-types)
+    - [Modules Organization](#modules-organization)
   - [Deployment](#deployment)
     - [Requirements](#requirements)
       - [Tools](#tools)
@@ -18,10 +21,26 @@
 
 ## Overview
 
-GITOps64 is a working implementation of the GITOps methodoly intended to serve as a boilerplate for automated Kubernetes Application deployment projects.
+GITOps64 is a working implementation of the GITOps methodology, intended to serve as a boilerplate for automated Kubernetes Application deployment projects.
 The main purpose is to provide ready-to-use deployment modules for popular Kubernetes tools.
 
-### Directory structure
+## Design Requirements
+
+- DR01: separate CICD code from module code
+- DR02: support both dev-time and run-time data and code
+- DR03: use Infrastructure-as-Code (IaC) as much as possible
+- DR04: support multiple IaC and not IaC tools
+- DR05: keep code, configuration and run-time separated
+- DR06: use environments to allow multiple instances of configuration and run-time for the same module code
+- DR07: use profiles for code and configuration to allow multiple personalities for the same module
+- DR08: use dedicated git repositories for module code as much as possible, for cases where the IaC tools supports remote modules
+- DR09: keep the main branch stable (trunk branching strategy)
+- DR09: do not use long-lived branches except for release ones
+- DR10: group IaC tool code by module
+
+## IaC Repository Organization
+
+### Main directory structure
 
 - `bin`: continuous integration, repository, development scripts
 - `data`: location for persistent data files
@@ -34,14 +53,19 @@ The main purpose is to provide ready-to-use deployment modules for popular Kuber
 - `var`: location for persistent runtime data (included in GIT)
 - `vault`: location for runtime secrets (excluded from GIT)
 
-### Applications
+### Modules types
 
-Applications are organized based on type:
+Modules are organized based by type:
 
 - kubernetes: optional kubernetes components and APIs (e.g.: metrics-server, etc.)
 - infrastructure: infrastructure providing services to applications (e.g.: cert-manager, sealed-secrets, etc.)
 - applications: end-user applications
 - resources: non-application objects consumed by application and infrastructure (e.g.: certificates, storage, etc/)
+
+### Modules Organization
+
+- 'etc/ENVIROMENT/MODULE_TYPE/MODULE_NAME/IAC_TOOL/PROFILE'
+- 'src/MODULE_TYPE/MODULE_NAME/IAC_TOOL/PROFILE'
 
 ## Deployment
 
@@ -92,9 +116,10 @@ Tools marked with (\*) are not needed locally if using the lab container (`dev-l
 
 - Review and update dev-environment configuration as needed: `etc/<ENVIRONMENT>`, in particular values marked with replacement tags `X_..._X`
 
-  - [FluxCD](etc/dev/infrastructure/argocd/bl64-nodeport/gitops64.yaml)
-  - [ArgoCD](etc/dev/infrastructure/fluxcd/bl64-minikube/gitops64.yaml)
-  - [GitHub](etc/dev/infrastructure/github/bl64-default/gitops64.yaml)
+  - [FluxCD](etc/dev/infrastructure/argocd/bl64/nodeport/gitops64.yaml)
+  - [ArgoCD](etc/dev/infrastructure/fluxcd/bl64/github/gitops64.yaml)
+  - [GitHub](etc/dev/infrastructure/github/bl64/default/gitops64.yaml)
+  - Additional files can be found using the command: `find etc -type f -exec grep -l -E 'X_[A-Z0-9_]+_X' {} \;`
 
 - Review and update enabled modules: `var/<ENVIRONMENT>`:
 

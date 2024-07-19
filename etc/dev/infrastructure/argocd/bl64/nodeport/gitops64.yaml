@@ -10,7 +10,7 @@ g64:
       namespace: "argocd"
       context: "argocd"
     gitops:
-      repository: "git@github.com:itc64-dev/test-gitops.git"
+      repository: "X_GIT_REPO_URL_X"
     server:
       access: "port-forward"
 ...

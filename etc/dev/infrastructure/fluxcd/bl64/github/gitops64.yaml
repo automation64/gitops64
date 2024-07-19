@@ -5,7 +5,7 @@ g64:
     version: "2.0.0"
     cluster:
       owner: "X_GITHUB_REPO_OWNER_X"
-      repository: "test-gitops"
+      repository: "X_GIT_REPO_NAME_X"
       branch: "main"
       path: "var/dev/fluxcd"
       context: "dev"

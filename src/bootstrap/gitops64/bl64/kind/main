@@ -66,8 +66,11 @@ function gitops64_main_bootstrap() {
   bl64_msg_show_phase 'deploy ArgoCD'
   "${DEV_PATH_SRC}/infrastructure/argocd/bl64/default/main" -e dev -p nodeport -c &&
     "${DEV_PATH_SRC}/infrastructure/argocd/bl64/default/main" -e dev -p nodeport -l &&
-    "${DEV_PATH_SRC}/infrastructure/argocd/bl64/default/main" -e dev -p nodeport -k
+    "${DEV_PATH_SRC}/infrastructure/argocd/bl64/default/main" -e dev -p nodeport -k ||
+    return $?
 
+  bl64_msg_show_phase 'deploy Applications'
+  "${DEV_PATH_SRC}/infrastructure/argocd/bl64/default/control-application" -e dev -p nodeport -c
 }
 
 function gitops64_main_destroy() {

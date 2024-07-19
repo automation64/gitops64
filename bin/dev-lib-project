@@ -46,7 +46,9 @@ function dev_lib_project() {
     "$DEV_PATH_SRC" \
     "$DEV_PATH_VAR" \
     "$DEV_PATH_ETC" \
-    "$DEV_PATH_TEST" ||
+    "$DEV_PATH_TEST" \
+    '.env' \
+    '.local' ||
     return $?
 
   bl64_msg_show_task 'fix vault permissions for container access'
