@@ -4,8 +4,8 @@ g64:
     object: "g64.github"
     version: "2.0.0"
     repository:
-      owner: "itc64-dev"
-      name: "test-gitops"
+      owner: "X_GIT_REPO_OWNER_X"
+      name: "X_GIT_REPO_NAME_X"
     api:
       ssh:
         type: "ed25519"
