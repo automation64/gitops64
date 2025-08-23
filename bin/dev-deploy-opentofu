@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# * template-task: 1.8.0
+#######################################
+# Copyright SerDigital64 - https://github.com/serdigital64
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#######################################
+
+# shellcheck source=bin/dev-set
+source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2>&1 && exit 1; }
+# shellcheck source-path=bin
+source ./bin/dev-env-iac64 &&
+  source ./bin/dev-env-opentofu || exit 1
+# shellcheck source-path=lib/bl64
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fmt.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-core.bash" || exit 1
+
+declare MY_MODULE="${1:-}"
+declare MY_VERSION="${2:-}"
+declare MY_STAGING=''
+declare MY_LOGS=''
+
+function my_deploy() {
+  bl64_dbg_app_show_function
+  local auto_deploy='-auto-approve'
+
+  bl64_msg_show_task 'Prepare log store'
+  bl64_fs_path_remove "$MY_LOGS"
+  bl64_fs_dir_create \
+    "$BL64_VAR_DEFAULT" "$BL64_VAR_DEFAULT" "$BL64_VAR_DEFAULT" "$MY_LOGS" ||
+    return $?
+
+  bl64_msg_show_task 'Run deploy phase'
+  bl64_lib_flag_is_enabled "$DEV_DEPLOY_OPENTOFU_AUTO_APPLY" || auto_deploy=''
+  cd "$MY_STAGING" &&
+    "$DEV_LIB_OPENTOFU_BIN" \
+      init \
+      -input=false &&
+    "$DEV_LIB_OPENTOFU_BIN" \
+      apply \
+      -input=false \
+      $auto_deploy
+}
+
+function my_initialize() {
+  bl64_dbg_app_show_function
+  bl64_msg_show_about
+
+  if ! bl64_lib_flag_is_enabled "$DEV_ENV_IAC64_ENABLED"; then
+    bl64_msg_show_error 'incompatible task. IaC64 must be enabled for repository: DEV_ENV_IAC64_ENABLED="YES"'
+    return $BL64_LIB_ERROR_TASK_REQUIREMENTS
+  fi
+
+  MY_STAGING="${DEV_PATH_PROF_BUILD_STAGING}/${DEV_ENV_IAC64_TAG_OPENTOFU}/${MY_MODULE}/${MY_VERSION}"
+  MY_LOGS="${DEV_PATH_PROF_LOGS}/${DEV_ENV_IAC64_TAG_OPENTOFU}/${MY_MODULE}/${MY_VERSION}"
+  TF_LOG_PATH="${MY_LOGS}/${DEV_DEPLOY_OPENTOFU_LOG}"
+
+  bl64_check_command "$DEV_LIB_OPENTOFU_BIN" &&
+    bl64_check_directory "$MY_STAGING" &&
+    bl64_check_parameter 'MY_MODULE' &&
+    bl64_check_parameter 'MY_VERSION' &&
+    db64_profile_check_set &&
+    bl64_msg_show_setup "$BL64_VAR_DEFAULT" \
+      'DEV_PROFILE' \
+      'MY_MODULE' \
+      'MY_VERSION' \
+      'MY_STAGING' \
+      'MY_LOGS' \
+      'DEV_DEPLOY_OPENTOFU_AUTO_APPLY'
+}
+
+[[ -n "$DEV_CICD_DEBUG" ]] && bl64_dbg_all_enable
+bl64_lib_script_version_set '1.1.0'
+bl64_msg_help_about_set 'Deploy from stating environment'
+bl64_msg_all_enable_verbose && my_initialize || exit $?
+
+bl64_msg_show_batch_start "$BL64_SCRIPT_ID"
+my_deploy
+bl64_msg_show_batch_finish $? "$BL64_SCRIPT_ID"
