@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# * template-env-inst64: 1.1.0
+#######################################
+# Copyright SerDigital64 - https://github.com/serdigital64
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#######################################
+
+#
+# Globals
+#
+# * Use .env file to override values
+#
+
+# shellcheck disable=SC2154
+{
+  # Env / OpenTofu / Module environment definition version
+  export DEV_ENV_OPENTOFU_VERSION='1.1.0'
+  # Env / OpenTofu / Enable export to Terraform compatible registry
+  export DEV_ENV_OPENTOFU_EXPORT_ENABLED="${DEV_ENV_OPENTOFU_EXPORT_ENABLED:-YES}"
+
+  # Lib / OpenTofu / Installer
+  export DEV_LIB_OPENTOFU_INSTALLER="${DEV_LIB_INSTALLER64_TARGET}/install-opentofu"
+  # Lib / OpenTofu / Target path
+  export DEV_LIB_OPENTOFU_TARGET="${DEV_LIB_OPENTOFU_TARGET:-${DEV_PATH_LIB}/otf}"
+
+  # Build / OpenTofu / Staging path
+  export DEV_BUILD_OPENTOFU_STAGING="${DEV_PATH_BUILD_STAGING}/opentofu"
+
+  # Test / OpenTofu / Work paths
+  export DEV_TEST_OPENTOFU_OUTPUT="${DEV_PATH_TMP}/opentofu"
+  export DEV_TEST_OPENTOFU_LOGS="${DEV_PATH_LOGS}/opentofu"
+
+  # Test / OpenTofu / Cases path
+  export DEV_TEST_OPENTOFU_CASES="${DEV_PATH_TEST}/opentofu"
+  export DEV_TEST_OPENTOFU_CASES_PLAN="${DEV_TEST_OPENTOFU_CASES}/plan"
+  export DEV_TEST_OPENTOFU_CASES_TEST="${DEV_TEST_OPENTOFU_CASES}/tests"
+
+  # Test / OpenTofu / Artifacts
+  export DEV_TEST_OPENTOFU_PLAN='test.plan'
+  export DEV_TEST_OPENTOFU_LOG='test.log'
+
+  # Deploy / OpenTofu / Artifacts
+  export DEV_DEPLOY_OPENTOFU_LOG='apply.log'
+}
+
+#
+# Locals
+#
+# * Use .local.env file or CICD variables to override values
+#
+
+# shellcheck disable=SC2154
+{
+  # Lib / OpenTofu / Command
+  export DEV_LIB_OPENTOFU_BIN="${DEV_LIB_OPENTOFU_BIN:-${DEV_LIB_OPENTOFU_TARGET}/tofu}"
+  
+  # Build / OpenTofu / Reset staging path before build?
+  export DEV_BUILD_OPENTOFU_RESET="${DEV_BUILD_OPENTOFU_RESET:-YES}"
+
+  # Deploy / OpenTofu / Auto-approve and apply without confirmation?
+  export DEV_DEPLOY_OPENTOFU_AUTO_APPLY="${DEV_DEPLOY_OPENTOFU_AUTO_APPLY:-NO}"
+}
+
+#
+# External
+#
+
+# shellcheck disable=SC2154
+{
+  # Lib / OpenTofu / CLI setup
+  export TF_IN_AUTOMATION='ON'
+  export TF_LOG='debug'
+  export TF_LOG_PATH=''
+
+  # Lib / OpenTofu / DevBin64 variables
+  export TF_VAR_DEV_PROFILE="$DEV_PROFILE"
+  export TF_VAR_DEV_PATH_BIN="$DEV_PATH_BIN"
+  export TF_VAR_DEV_PATH_BUILD="$DEV_PATH_BUILD"
+  export TF_VAR_DEV_PATH_DOCS="$DEV_PATH_DOCS"
+  export TF_VAR_DEV_PATH_ETC="$DEV_PATH_ETC"
+  export TF_VAR_DEV_PATH_LIB="$DEV_PATH_LIB"
+  export TF_VAR_DEV_PATH_LOGS="$DEV_PATH_LOGS"
+  export TF_VAR_DEV_PATH_SRC="$DEV_PATH_SRC"
+  export TF_VAR_DEV_PATH_TEST="$DEV_PATH_TEST"
+  export TF_VAR_DEV_PATH_TMP="$DEV_PATH_TMP"
+  export TF_VAR_DEV_PATH_VAR="$DEV_PATH_VAR"
+  export TF_VAR_DEV_PATH_VAULT="$DEV_PATH_VAULT"
+  export TF_VAR_DEV_PATH_PROF_BUILD="$DEV_PATH_PROF_BUILD"
+  export TF_VAR_DEV_PATH_PROF_BUILD_PREPARE="$DEV_PATH_PROF_BUILD_PREPARE"
+  export TF_VAR_DEV_PATH_PROF_BUILD_STAGING="$DEV_PATH_PROF_BUILD_STAGING"
+  export TF_VAR_DEV_PATH_PROF_BUILD_PACK="$DEV_PATH_PROF_BUILD_PACK"
+  export TF_VAR_DEV_PATH_PROF_ETC="$DEV_PATH_PROF_ETC"
+  export TF_VAR_DEV_PATH_PROF_LOGS="$DEV_PATH_PROF_LOGS"
+  export TF_VAR_DEV_PATH_PROF_TMP="$DEV_PATH_PROF_TMP"
+  export TF_VAR_DEV_PATH_PROF_VAR="$DEV_PATH_PROF_VAR"
+  export TF_VAR_DEV_PATH_PROF_VAULT="$DEV_PATH_PROF_VAULT"
+}

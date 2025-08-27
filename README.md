@@ -110,7 +110,6 @@ Tools marked with (\*) are not needed locally if using the lab container (`dev-l
 - Initialize dev time resources
 
   ```shell
-  ./bin/dev-lib-local &&
   ./bin/dev-lib-base
   ```
 

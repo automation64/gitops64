@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# * Version: 2.0.1
+#######################################
+# Copyright SerDigital64 - https://github.com/serdigital64
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#######################################
+
+#
+# Globals
+#
+# * Use .env file to override values
+#
+
+# shellcheck disable=SC2154
+{
+  # Env / Hadolint / Container Registry for tools
+  export DEV_ENV_HADOLINT_REGISTRY="${DEV_ENV_HADOLINT_REGISTRY:-ghcr.io/automation64}"
+  # Env / Hadolint / Container path for project mounts
+  export DEV_ENV_HADOLINT_CONTAINER_PATH_ROOT='/project'
+  # Lib / Hadolint / Installer
+  export DEV_LIB_HADOLINT_INSTALLER="${DEV_LIB_INSTALLER64_TARGET}/install-hadolint"
+  # Lib / Hadolint / Target
+  export DEV_LIB_HADOLINT_TARGET="${DEV_LIB_HADOLINT_TARGET:-${DEV_PATH_LIB}/hadolint}"
+  # Lint / Hadolint / Configuration
+  export DEV_LIB_HADOLINT_CFG='.hadolint.yaml'
+  # Lint / Hadolint / Sources
+  export DEV_LINT_HADOLINT_SOURCE="${DEV_LINT_HADOLINT_SOURCE:-$DEV_BASE_SRC}"
+  # Lint / Hadolint / Container with linting tool
+  export DEV_LINT_HADOLINT_CONTAINER="${DEV_LINT_HADOLINT_CONTAINER:-container-lint/alpine-3-container-lint}"
+  # Lint / Hadolint / Container entrypoint
+  export DEV_LINT_HADOLINT_CONTAINER_ENTRYPOINT="${DEV_LINT_HADOLINT_CONTAINER_ENTRYPOINT:-/usr/local/bin/hadolint}"
+}
+
+#
+# Locals
+#
+# * Use .local.env file or CICD variables to override values
+#
+
+# shellcheck disable=SC2154
+{
+  # Lib / Hadolint / Command
+  export DEV_LIB_HADOLINT_BIN="${DEV_LIB_HADOLINT_BIN:-${DEV_LIB_HADOLINT_TARGET}/hadolint}"
+}
+
+#
+# Secrets
+#
+# * Use .secrets.env file or CICD secrets to override values
+#

@@ -1,18 +1,10 @@
 #!/usr/bin/env bash
 #######################################
-# Dev / Lab / Kind / Open sandbox environment
-#
-# * Version: 1.0.1
-#
-#######################################
-# Copyright [2023] [serdigital64@gmail.com]
+# Copyright SerDigital64 - https://github.com/serdigital64
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
+# You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +21,9 @@ source ./bin/dev-set || { echo 'dev-set:Error: unable to load dev environment' 2
 # shellcheck source-path=bin
 source ./bin/dev-env-kind || exit 1
 # shellcheck source-path=lib/bl64
-source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
+source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-xsv.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-bsh.bash" &&
+  source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-txt.bash" &&
   source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fmt.bash" &&
   source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-fs.bash" &&
   source "${DEV_LIB_BASHLIB64_TARGET}/bashlib64-module-rnd.bash" &&
@@ -47,9 +41,10 @@ function dev_lab_open() {
   local -i status=0
 
   bl64_msg_show_warning "temporary opening kubeconfig path permissions (${DEV_ENV_KIND_PATH_KUBE})"
-  bl64_fs_fix_permissions '0644' '0755' "${DEV_ENV_KIND_PATH_KUBE}"
+  bl64_fs_path_permission_set '0644' '0755' "$BL64_VAR_DEFAULT" "$BL64_VAR_DEFAULT" "$BL64_VAR_ON" \
+    "${DEV_ENV_KIND_PATH_KUBE}"
 
-  bl64_msg_show_task "open sanbox environment (${dev_lab_image})"
+  bl64_msg_show_task "open sandbox environment (${dev_lab_image})"
   bl64_cnt_run_interactive \
     --network=host \
     --entrypoint="$DEV_LAB_KIND_CONTAINER_ENTRYPOINT" \
@@ -64,7 +59,8 @@ function dev_lab_open() {
   status=$?
 
   bl64_msg_show_task "closing kubeconfig path permissions (${DEV_ENV_KIND_PATH_KUBE})"
-  bl64_fs_fix_permissions '0600' '0700' "${DEV_ENV_KIND_PATH_KUBE}"
+  bl64_fs_path_permission_set '0600' '0700' "$BL64_VAR_DEFAULT" "$BL64_VAR_DEFAULT" "$BL64_VAR_ON" \
+    "${DEV_ENV_KIND_PATH_KUBE}"
   ((status == 0)) && status=$?
   return $status
 }
@@ -82,9 +78,10 @@ function dev_lab_initialize() {
 declare dev_lab_image="${1:-${DEV_LAB_KIND_IMAGE}}"
 
 [[ -n "$DEV_CICD_DEBUG" ]] && bl64_dbg_all_enable
-
+bl64_lib_script_version_set '1.0.4'
 bl64_msg_all_enable_verbose
-bl64_msg_show_batch_start 'dev-lab-kind'
+
+bl64_msg_show_batch_start "$BL64_SCRIPT_ID"
 dev_lab_initialize &&
   dev_lab_open "$dev_lab_image"
-bl64_msg_show_batch_finish $? 'dev-lab-kind'
+bl64_msg_show_batch_finish $? "$BL64_SCRIPT_ID"
